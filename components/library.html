@@ -30,10 +30,28 @@
                     <h3 id="card-front-word" class="text-4xl font-black text-slate-800 dark:text-white">---</h3>
                     <p id="card-front-ipa" class="text-blue-500 font-mono mt-2">/---/</p>
                 </div>
-                <div class="absolute w-full h-full backface-hidden bg-blue-600 rounded-[2.5rem] flex flex-col items-center justify-center p-6 text-center text-white rotate-y-180">
-                    <p id="card-back-mean" class="text-2xl font-black mb-4">---</p>
-                    <p id="card-back-example" class="bg-white/10 p-4 rounded-2xl text-sm italic w-full">"---"</p>
-                </div>
+                <div class="absolute w-full h-full backface-hidden bg-blue-600 rounded-[2.5rem] flex flex-col items-start justify-center p-8 text-white rotate-y-180 overflow-hidden">
+    <div class="mb-4">
+        <p id="card-back-mean" class="text-3xl font-black tracking-tight leading-tight">---</p>
+        <p id="card-back-type-ipa" class="text-[10px] font-black uppercase opacity-70 tracking-widest mt-1">---</p>
+    </div>
+
+    <div class="space-y-4 w-full">
+        <p id="card-back-example" class="bg-white/10 p-4 rounded-2xl text-sm italic w-full border border-white/10 leading-relaxed">"---"</p>
+        
+        <div class="grid grid-cols-2 gap-2 text-[10px] font-bold">
+            <div class="bg-black/10 p-2 rounded-lg"><span class="opacity-50 uppercase block mb-1">Đồng nghĩa</span> <span id="card-back-synonyms">---</span></div>
+            <div class="bg-black/10 p-2 rounded-lg"><span class="opacity-50 uppercase block mb-1">Trái nghĩa</span> <span id="card-back-antonyms">---</span></div>
+        </div>
+
+        <div id="card-back-note-box" class="bg-amber-400/20 p-3 rounded-xl border border-amber-400/30 hidden">
+            <p class="text-[9px] font-black uppercase text-amber-300 mb-1">💡 Ghi nhớ</p>
+            <p id="card-back-note" class="text-xs font-medium leading-snug"></p>
+        </div>
+    </div>
+    
+    <div class="absolute bottom-6 right-6 opacity-30 text-2xl">🔊</div>
+</div>
             </div>
         </div>
         <div class="flex justify-between items-center gap-4">

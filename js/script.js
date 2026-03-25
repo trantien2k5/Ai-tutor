@@ -19,6 +19,27 @@ let quizState = {
     timerInterval: null
 };
 
+/* [CỤC: UI_UTILITIES] */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    // Success: màu tối sang trọng, Error: màu đỏ
+    const bgColor = type === 'success' ? 'bg-slate-900/90 dark:bg-blue-600/90' : 'bg-red-600/90';
+    
+    toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md font-bold text-xs uppercase tracking-widest toast-in pointer-events-auto`;
+    toast.innerHTML = message;
+
+    container.appendChild(toast);
+
+    // Tự động xóa sau 3 giây
+    setTimeout(() => {
+        toast.classList.replace('toast-in', 'toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 /* [CỤC: NAV_LOGIC] */
 function switchTab(tabId) {
     // Ẩn tất cả tab
@@ -68,7 +89,7 @@ Ensure diverse word types. Return ONLY a JSON array:
 
 function copyPrompt() {
     navigator.clipboard.writeText(document.getElementById('generated-prompt').innerText);
-    alert('Đã copy prompt nâng cao!');
+    showToast('📋 Đã copy prompt nâng cao!');
 }
 
 function processVocab() {
@@ -85,11 +106,13 @@ function processVocab() {
             vocabList = [...dataWithTopic, ...vocabList];
             localStorage.setItem('my_vocab', JSON.stringify(vocabList));
             inputArea.value = '';
-            renderLibrary();
-            alert(`🎉 Đã nạp ${newData.length} từ vựng đầy đủ thông tin!`);
+            refreshAllUI();
+            showToast(`🎉 Đã nạp ${newData.length} từ vựng mới!`);
             switchTab('library');
         }
-    } catch (e) { alert('❌ Lỗi: JSON không hợp lệ!'); }
+    } catch (e) { 
+        showToast('❌ Lỗi: JSON không hợp lệ!', 'error'); 
+    }
 }
 
 /* [CỤC: LIBRARY_SUB_NAVIGATION] */
@@ -150,7 +173,10 @@ function renderLibrary() {
     container.innerHTML = topics.map(topic => {
         const count = vocabList.filter(v => (v.topic || 'Chung') === topic).length;
         return `
-            <div onclick="startFlashcards('${topic}')" class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border-2 border-slate-50 dark:border-slate-700 shadow-sm hover:border-blue-500 transition-all cursor-pointer group">
+            <div onclick="startFlashcards('${topic}')" class="relative bg-white dark:bg-slate-800 p-6 rounded-[2rem] border-2 border-slate-50 dark:border-slate-700 shadow-sm hover:border-blue-500 transition-all cursor-pointer group">
+                <button onclick="event.stopPropagation(); deleteTopic('${topic}')" class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white z-10">
+                    <i class="fas fa-trash-alt text-[10px]"></i>
+                </button>
                 <div class="text-2xl mb-2">📁</div>
                 <h3 class="font-black text-slate-800 dark:text-white text-xs uppercase">${topic}</h3>
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${count} từ</p>
@@ -200,13 +226,25 @@ function renderVocabList() {
     updateQuizTopics();
 }
 
+function deleteTopic(topic) {
+    if (confirm(`Bạn có chắc muốn xóa toàn bộ chủ đề "${topic}"?`)) {
+        // Lọc bỏ tất cả các từ thuộc chủ đề này
+        vocabList = vocabList.filter(v => (v.topic || 'Chung') !== topic);
+        localStorage.setItem('my_vocab', JSON.stringify(vocabList));
+        
+        // Cập nhật lại toàn bộ giao diện
+        renderLibrary();
+        updateStats();
+        updateQuizTopics();
+        if (typeof showToast === "function") showToast(`Đã xóa chủ đề: ${topic}`);
+    }
+}
+
 function deleteVocab(index) {
     if (confirm('Xóa từ này khỏi thư viện?')) {
         vocabList.splice(index, 1);
         localStorage.setItem('my_vocab', JSON.stringify(vocabList));
-        renderLibrary();
-        renderVocabList();
-        updateStats();
+        refreshAllUI();
     }
 }
 
@@ -241,7 +279,7 @@ function updateQuizTopics() {
 function initNewQuiz() {
     const topic = document.getElementById('quiz-topic-select').value;
     let filtered = topic === 'all' ? [...vocabList] : vocabList.filter(v => v.topic === topic);
-    if (filtered.length < 4) return alert("Cần ít nhất 4 từ để luyện tập!");
+    if (filtered.length < 4) return showToast("⚠️ Cần ít nhất 4 từ để học!", 'error');
 
     quizState.pool = filtered.sort(() => 0.5 - Math.random()).slice(0, quizState.total);
     quizState.currentIdx = 0;
@@ -423,7 +461,7 @@ let currentCardIndex = 0;
 /* [CỤC: FLASHCARD_CORE_LOGIC] */
 function startFlashcards(topic) {
     currentSessionWords = vocabList.filter(v => (v.topic || 'Chung') === topic);
-    if (currentSessionWords.length === 0) return alert("Chủ đề này chưa có từ vựng!");
+    if (currentSessionWords.length === 0) return showToast("📂 Chủ đề này chưa có từ!", 'error');
 
     currentCardIndex = 0;
     switchTab('library');
@@ -477,9 +515,15 @@ function updateStats() {
             </div>`;
     }).join('');
 
-    // Cập nhật các thông số khác (nếu có các element tương ứng)
+    // Cập nhật số lượng và thanh tiến độ mục tiêu học tập hàng ngày
     const totalCountEl = document.getElementById('home-count');
+    const progressBar = document.getElementById('goal-progress-bar');
+    
     if (totalCountEl) totalCountEl.innerText = vocabList.length;
+    if (progressBar) {
+        const percent = Math.min((vocabList.length / (appSettings.dailyGoal || 10)) * 100, 100);
+        progressBar.style.width = percent + '%';
+    }
 }
 
 function loadVoices() {
@@ -503,8 +547,15 @@ function speak(text) {
 }
 
 /* [CỤC: INITIALIZATION] */
+function refreshAllUI() {
+    renderLibrary();
+    updateStats();
+    renderVocabList();
+    updateQuizTopics();
+}
+
 window.onload = async () => {
-    // 1. Nạp tất cả giao diện
+    // Nạp giao diện và đợi hoàn tất 100% trước khi render (Xóa setTimeout lỗi race condition)
     await Promise.all([
         loadComponent('tab-home', 'home.html'),
         loadComponent('tab-library', 'library.html'),
@@ -513,19 +564,11 @@ window.onload = async () => {
         loadComponent('tab-settings', 'settings.html')
     ]);
 
-    // 2. Khởi tạo dữ liệu
     loadSettingsUI();
     applyTheme();
-
-    // 3. Render nội dung sau khi các tab đã sẵn sàng
-    setTimeout(() => {
-        renderLibrary();   // Hiển thị folder trong Thư viện 
-        updateStats();     // Hiển thị folder ở Trang chủ
-        renderVocabList(); // Hiển thị danh sách từ trong Sổ tay 
-        updateQuizTopics();// Cập nhật chủ đề luyện tập
-        loadVoices();
-        switchTab('home');
-    }, 200);
+    loadVoices();
+    refreshAllUI();
+    switchTab('home');
 };
 
 /* [CỤC: COMPONENT_LOADER] */
@@ -550,17 +593,44 @@ function showCard() {
     const card = currentSessionWords[currentCardIndex];
     if (!card) return;
 
+    // Mặt trước
     document.getElementById('card-front-word').innerText = card.word;
     document.getElementById('card-front-ipa').innerText = card.ipa || '';
+
+    // Mặt sau (Full Info)
     document.getElementById('card-back-mean').innerText = card.mean;
+    document.getElementById('card-back-type-ipa').innerText = `${card.type || 'n'} • ${card.ipa || ''}`;
     document.getElementById('card-back-example').innerText = `"${card.example}"`;
+    document.getElementById('card-back-synonyms').innerText = card.synonyms || 'N/A';
+    document.getElementById('card-back-antonyms').innerText = card.antonyms || 'N/A';
+    
+    const noteBox = document.getElementById('card-back-note-box');
+    const noteText = document.getElementById('card-back-note');
+    if (card.note) {
+        noteText.innerText = card.note;
+        noteBox.classList.remove('hidden');
+    } else {
+        noteBox.classList.add('hidden');
+    }
+
     document.getElementById('card-progress').innerText = `${currentCardIndex + 1} / ${currentSessionWords.length}`;
     document.getElementById('card-inner').classList.remove('rotate-y-180');
+    
     if (appSettings.autoSpeak) speak(card.word);
 }
 
 function flipCard() {
-    document.getElementById('card-inner').classList.toggle('rotate-y-180');
+    const inner = document.getElementById('card-inner');
+    const isFlippingToBack = !inner.classList.contains('rotate-y-180');
+    
+    inner.classList.toggle('rotate-y-180');
+    
+    // Tự động phát âm khi lật (như người bản xứ nhờ engine TTS đã cấu hình)
+    const card = currentSessionWords[currentCardIndex];
+    if (card) {
+        // Ưu tiên phát âm khi lật để tăng phản xạ ghi nhớ
+        speak(card.word);
+    }
 }
 
 function nextCard() {
