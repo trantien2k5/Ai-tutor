@@ -94,6 +94,61 @@
     </nav>
 
     <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] space-y-3 pointer-events-none"></div>
+
+<div id="flashcard-view" class="hidden fixed inset-0 bg-slate-100 dark:bg-slate-950 z-[999] flex flex-col items-center justify-center p-4 md:p-6 overflow-y-auto shadow-2xl">
+    <div class="w-full max-w-md flex flex-col items-center">
+        <div class="w-full flex items-center justify-between mb-6">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Ai Tutor Mode</h2>
+            <div class="flex items-center gap-3">
+                <span id="card-progress" class="text-[10px] font-bold text-slate-500">0 / 0</span>
+                <button onclick="closeFlashcards()" class="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-full text-white hover:bg-red-500 transition-colors">✕</button>
+            </div>
+        </div>
+
+        <div class="w-full h-1 bg-slate-800 rounded-full mb-8 overflow-hidden">
+            <div id="card-progress-bar" class="h-full bg-blue-500 transition-all duration-300 w-0"></div>
+        </div>
+
+        <div class="w-full flashcard-container aspect-[3/4] min-h-[420px]">
+            <div id="card-inner" onclick="flipCard()" class="flashcard-inner relative w-full h-full cursor-pointer preserve-3d">
+                <div class="flashcard-front bg-white absolute w-full h-full backface-hidden rounded-[2.5rem] p-8 flex flex-col justify-between shadow-2xl">
+                    <div class="w-full">
+                        <p id="card-front-word" class="text-4xl font-extrabold text-slate-800 tracking-tighter mb-2">---</p>
+                        <div class="flex items-center gap-2">
+                            <span id="card-front-ipa" class="text-xs font-bold text-slate-400">/---/</span>
+                            <span id="card-front-type" class="text-[9px] font-black uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded">---</span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Chạm để xem nghĩa →</p>
+                </div>
+                <div id="card-back" style="background-color: #2563eb;" class="flashcard-back absolute w-full h-full backface-hidden bg-blue-600 rounded-[2.5rem] flex flex-col items-start justify-center p-8 text-white rotate-y-180 shadow-2xl">
+                    <div class="mb-6 w-full">
+                        <p id="card-back-mean" class="text-3xl font-black leading-tight">---</p>
+                        <p id="card-back-type-ipa" class="text-[10px] font-black uppercase opacity-60 mt-1">---</p>
+                    </div>
+                    <div class="space-y-4 w-full">
+                        <p id="card-back-example" class="bg-white/10 p-4 rounded-2xl text-sm italic border border-white/5 leading-relaxed">---</p>
+                        <div class="grid grid-cols-2 gap-2 text-[10px] font-bold">
+                            <div class="bg-black/10 p-2 rounded-lg"><span class="opacity-50 uppercase block mb-1">Đồng nghĩa</span> <span id="card-back-synonyms">---</span></div>
+                            <div class="bg-black/10 p-2 rounded-lg"><span class="opacity-50 uppercase block mb-1">Trái nghĩa</span> <span id="card-back-antonyms">---</span></div>
+                        </div>
+                        <div id="card-back-note-box" class="bg-amber-400/20 p-3 rounded-xl border border-amber-400/20 hidden">
+                            <p id="card-back-note" class="text-[11px] font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full flex flex-col gap-4 mt-8">
+            <button id="next-card-btn" onclick="nextCard()" class="w-full bg-white text-blue-600 font-black uppercase text-xs py-4 rounded-2xl shadow-xl active:scale-95 transition-all">Next Card →</button>
+            <div class="flex justify-center gap-8">
+                <button onclick="prevCard()" class="text-slate-500 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">← Prev</button>
+                <button onclick="speak(currentSessionWords[currentCardIndex].word)" class="text-slate-500 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">Audio 🔊</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="js/script.js"></script>
 </body>
 

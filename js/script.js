@@ -20,6 +20,14 @@ let quizState = {
 };
 
 /* [CỤC: UI_UTILITIES] */
+let searchTimeout;
+function handleSearchInput() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        renderVocabList(true); // Đợi người dùng ngừng gõ 300ms mới bắt đầu lọc và render
+    }, 300);
+}
+
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -75,10 +83,27 @@ function generatePrompt() {
     const level = document.getElementById('user-level').value;
     const count = document.getElementById('user-count').value;
 
-    // Nâng cấp prompt để lấy IPA, Từ đồng nghĩa và Ghi chú
-    const prompt = `Act as an Oxford English Teacher. Create ${count} vocabulary words for "${topic}" (Level ${level}). 
-Ensure diverse word types. Return ONLY a JSON array: 
-[{"word": "...", "ipa": "/.../", "type": "...", "mean": "...", "synonyms": "...", "antonyms": "...", "example": "...", "note": "Mẹo nhớ..."}]`;
+    // Tối ưu prompt: Ép chặt tiếng Việt, chuẩn hóa loại từ (n, v, adj) và chống rác JSON
+    const prompt = `Act as an expert English teacher. Generate exactly ${count} English vocabulary words for the topic "${topic}" at ${level} level. 
+CRITICAL RULES:
+1. Mix word types.
+2. "type" MUST be an abbreviation (n, v, adj, adv).
+3. "mean" and "note" MUST be in Vietnamese.
+4. Output ONLY a valid raw JSON array. NO markdown, NO code blocks (do NOT use \`\`\`json), NO conversational text.
+
+Format EXACTLY like this:
+[
+  {
+    "word": "English word",
+    "ipa": "/IPA pronunciation/",
+    "type": "n/v/adj/adv",
+    "mean": "Nghĩa tiếng Việt (ngắn gọn)",
+    "synonyms": "1-2 English synonyms",
+    "antonyms": "1-2 English antonyms (or 'None')",
+    "example": "A simple English example sentence",
+    "note": "Một câu tiếng Việt ngắn giúp dễ nhớ từ này"
+  }
+]`;
 
     const promptCode = document.getElementById('generated-prompt');
     if (promptCode) {
@@ -165,19 +190,23 @@ function renderLibrary() {
     }).join('');
 }
 
-function renderVocabList() {
+let notebookRenderLimit = 50;
+
+function renderVocabList(resetLimit = true) {
     const container = document.getElementById('vocab-container');
     if (!container) return;
+
+    if (resetLimit) notebookRenderLimit = 50;
 
     const searchInput = document.getElementById('library-search');
     const filterSelect = document.getElementById('library-filter');
     
-    // Cập nhật số lượng từ ở Dashboard
     const homeCount = document.getElementById('home-count');
     if (homeCount) homeCount.innerText = vocabList.length;
 
     const searchTerm = (searchInput && searchInput.value) ? searchInput.value.toLowerCase() : '';
     const filterType = filterSelect ? filterSelect.value : 'all';
+    
     const filteredList = vocabList.filter(item => {
         const matchesSearch = item.word.toLowerCase().includes(searchTerm) || item.mean.toLowerCase().includes(searchTerm);
         const matchesFilter = filterType === 'all' || (item.type && item.type.toLowerCase().includes(filterType));
@@ -187,24 +216,44 @@ function renderVocabList() {
     if (filteredList.length === 0) {
         container.innerHTML = `<div class="col-span-full py-20 text-center animate-pulse"><p class="text-4xl mb-4">🔍</p><p class="text-slate-400 font-bold">Không tìm thấy từ vựng nào.</p></div>`;
     } else {
-        container.innerHTML = filteredList.map((item) => {
+        // Cắt mảng dữ liệu để không làm quá tải DOM
+        const itemsToRender = filteredList.slice(0, notebookRenderLimit);
+        
+        let htmlStr = itemsToRender.map((item) => {
             const originalIndex = vocabList.findIndex(v => v.word === item.word && v.mean === item.mean);
-            return `<div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+            return `<div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                 <div class="flex justify-between items-start mb-3">
-                    <div><h3 class="text-xl font-black text-slate-800">${item.word}</h3><span class="text-[10px] font-black uppercase text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md">${item.type || 'n'}</span></div>
+                    <div><h3 class="text-xl font-black text-slate-800 dark:text-white">${item.word}</h3><span class="text-[10px] font-black uppercase text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md">${item.type || 'n'}</span></div>
                     <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="speak('${item.word}')" class="p-2 hover:bg-blue-50 text-blue-500 rounded-xl transition-colors">🔊</button>
-                        <button onclick="deleteVocab(${originalIndex})" class="p-2 hover:bg-red-50 text-red-400 rounded-xl transition-colors">🗑️</button>
+                        <button onclick="speak('${item.word}')" class="p-2 hover:bg-blue-50 dark:hover:bg-slate-700 text-blue-500 rounded-xl transition-colors">🔊</button>
+                        <button onclick="deleteVocab(${originalIndex})" class="p-2 hover:bg-red-50 dark:hover:bg-slate-700 text-red-400 rounded-xl transition-colors">🗑️</button>
                     </div>
                 </div>
-                <p class="text-slate-600 font-bold text-sm mb-2">${item.mean}</p>
-                <div class="bg-slate-50 p-3 rounded-xl"><p class="text-xs italic text-slate-500 leading-relaxed">"${item.example}"</p></div>
+                <p class="text-slate-600 dark:text-slate-300 font-bold text-sm mb-2">${item.mean}</p>
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><p class="text-xs italic text-slate-500 dark:text-slate-400 leading-relaxed">"${item.example}"</p></div>
                 <div class="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-300 w-0 group-hover:w-full"></div>
             </div>`;
         }).join('');
+
+        // Sinh nút tải thêm nếu dữ liệu vẫn còn
+        if (filteredList.length > notebookRenderLimit) {
+            htmlStr += `
+                <div class="col-span-full flex justify-center mt-4 mb-4">
+                    <button onclick="loadMoreVocab()" class="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase px-6 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 transition-all tracking-widest shadow-sm">
+                        👇 Xem thêm ${filteredList.length - notebookRenderLimit} từ
+                    </button>
+                </div>
+            `;
+        }
+        container.innerHTML = htmlStr;
     }
     updateStats();
     updateQuizTopics();
+}
+
+function loadMoreVocab() {
+    notebookRenderLimit += 50;
+    renderVocabList(false); // Render tiếp, không reset lại limit
 }
 
 function deleteTopic(topic) {
@@ -463,11 +512,12 @@ function startFlashcards(topic) {
 function closeFlashcards() {
     const flashView = document.getElementById('flashcard-view');
     const headerSection = document.getElementById('library-header-section');
+    const topicsView = document.getElementById('library-topics-view');
     
     if (flashView) flashView.classList.add('hidden');
     if (headerSection) headerSection.classList.remove('hidden');
+    if (topicsView) topicsView.classList.remove('hidden'); // Đảm bảo hiện lại danh sách
     
-    // Luôn đưa người dùng quay lại màn hình "Chủ đề" sau khi tắt Flashcard
     switchLibView('topics');
 }
 
@@ -579,30 +629,64 @@ function showCard() {
     const card = currentSessionWords[currentCardIndex];
     if (!card) return;
 
-    // Mặt trước
-    document.getElementById('card-front-word').innerText = card.word;
-    document.getElementById('card-front-ipa').innerText = card.ipa || '';
+    // Hàm tiện ích bọc lót check null để chống Crash JS gây đen màn hình
+    const setHtml = (id, val) => { 
+        const el = document.getElementById(id); 
+        if(el) el.innerText = val; 
+    };
 
-    // Mặt sau (Full Info)
-    document.getElementById('card-back-mean').innerText = card.mean;
-    document.getElementById('card-back-type-ipa').innerText = `${card.type || 'n'} • ${card.ipa || ''}`;
-    document.getElementById('card-back-example').innerText = `"${card.example}"`;
-    document.getElementById('card-back-synonyms').innerText = card.synonyms || 'N/A';
-    document.getElementById('card-back-antonyms').innerText = card.antonyms || 'N/A';
-    
+    setHtml('card-front-word', card.word);
+    setHtml('card-front-ipa', card.ipa || '/---/');
+    setHtml('card-front-type', card.type || 'n');
+
+    setHtml('card-back-mean', card.mean);
+    setHtml('card-back-type-ipa', `${card.type || 'n'} • ${card.ipa || ''}`);
+    setHtml('card-back-example', `"${card.example}"`);
+    setHtml('card-back-synonyms', card.synonyms || 'N/A');
+    setHtml('card-back-antonyms', card.antonyms || 'N/A');
+
     const noteBox = document.getElementById('card-back-note-box');
     const noteText = document.getElementById('card-back-note');
-    if (card.note) {
+    if (card.note && noteText && noteBox) {
         noteText.innerText = card.note;
         noteBox.classList.remove('hidden');
-    } else {
+    } else if (noteBox) {
         noteBox.classList.add('hidden');
     }
 
-    document.getElementById('card-progress').innerText = `${currentCardIndex + 1} / ${currentSessionWords.length}`;
-    document.getElementById('card-inner').classList.remove('rotate-y-180');
+    const total = currentSessionWords.length;
+    const current = currentCardIndex + 1;
+    setHtml('card-progress', `${current} / ${total}`);
     
+    const progBar = document.getElementById('card-progress-bar');
+    if(progBar) progBar.style.width = `${(current / total) * 100}%`;
+    
+    const inner = document.getElementById('card-inner');
+    if(inner) inner.classList.remove('rotate-y-180');
+
     if (appSettings.autoSpeak) speak(card.word);
+}
+
+function flipCard() {
+    const inner = document.getElementById('card-inner');
+    if(inner) inner.classList.toggle('rotate-y-180');
+    
+    const card = currentSessionWords[currentCardIndex];
+    if (card) speak(card.word);
+}
+
+function nextCard() {
+    if (currentCardIndex < currentSessionWords.length - 1) {
+        currentCardIndex++;
+        showCard();
+    }
+}
+
+function prevCard() {
+    if (currentCardIndex > 0) {
+        currentCardIndex--;
+        showCard();
+    }
 }
 
 function flipCard() {
