@@ -1,25 +1,30 @@
 <section id="tab-library" class="tab-content hidden">
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Chủ đề học tập 📂</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Chọn một chủ đề để bắt đầu</p>
+    <div class="mb-6" id="library-header-section">
+        <div class="mb-4">
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Thư viện 📚</h2>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Quản lý từ vựng & chủ đề</p>
         </div>
-        <button onclick="toggleNotebook()" class="group flex items-center gap-2 bg-slate-900 dark:bg-blue-600 p-2 pr-4 rounded-full text-white shadow-lg active:scale-95 transition-all">
-            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">📓</div>
-            <span class="text-[10px] font-black uppercase tracking-tight">Sổ tay</span>
-        </button>
+
+        <div class="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl">
+            <button onclick="switchLibView('topics')" id="btn-view-topics" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all bg-white dark:bg-slate-700 text-blue-600 shadow-sm tracking-widest">Chủ đề 📂</button>
+            <button onclick="switchLibView('notebook')" id="btn-view-notebook" class="flex-1 py-3 rounded-xl text-[10px] font-black text-slate-400 uppercase transition-all hover:text-slate-600 dark:hover:text-slate-300 tracking-widest">Sổ tay 📓</button>
+        </div>
     </div>
 
-    <div id="library-topics-view" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        </div>
+    <div id="library-topics-view" class="grid grid-cols-2 gap-4"></div>
 
     <div id="library-notebook-view" class="hidden space-y-4">
-        <div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-            <input type="text" id="library-search" oninput="renderNotebook()" placeholder="Tìm trong sổ tay..." class="bg-transparent border-none outline-none text-sm px-2 w-full font-medium dark:text-white">
-            <button onclick="toggleNotebook()" class="text-[10px] font-black text-slate-400 uppercase px-2">Đóng</button>
+        <div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm focus-within:border-blue-500 transition-colors">
+            <span class="pl-3 opacity-50">🔍</span>
+            <input type="text" id="library-search" oninput="renderVocabList()" placeholder="Tìm từ, nghĩa..." class="bg-transparent border-none outline-none text-sm p-2 w-full font-medium dark:text-white">
+            <select id="library-filter" onchange="renderVocabList()" class="bg-slate-50 dark:bg-slate-900 border-none outline-none text-[10px] font-bold p-2 rounded-xl uppercase text-slate-500 cursor-pointer">
+                <option value="all">Tất cả</option>
+                <option value="v">Động từ (v)</option>
+                <option value="n">Danh từ (n)</option>
+                <option value="adj">Tính từ (adj)</option>
+            </select>
         </div>
-        <div id="vocab-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-10">
-            </div>
+        <div id="vocab-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-10"></div>
     </div>
 
     <div id="flashcard-view" class="hidden space-y-6 animate-in fade-in zoom-in duration-300">

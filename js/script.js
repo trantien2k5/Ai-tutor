@@ -116,46 +116,27 @@ function processVocab() {
 }
 
 /* [CỤC: LIBRARY_SUB_NAVIGATION] */
-function toggleNotebook() {
-    const topicView = document.getElementById('library-topics-view');
+function switchLibView(view) {
+    const topicsView = document.getElementById('library-topics-view');
     const notebookView = document.getElementById('library-notebook-view');
-    const isNotebookHidden = notebookView.classList.contains('hidden');
+    const btnTopics = document.getElementById('btn-view-topics');
+    const btnNotebook = document.getElementById('btn-view-notebook');
 
-    if (isNotebookHidden) {
-        topicView.classList.add('hidden');
-        notebookView.classList.remove('hidden');
-        renderNotebook();
-    } else {
-        topicView.classList.remove('hidden');
+    const activeClass = "flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all bg-white dark:bg-slate-700 text-blue-600 shadow-sm tracking-widest";
+    const inactiveClass = "flex-1 py-3 rounded-xl text-[10px] font-black text-slate-400 uppercase transition-all hover:text-slate-600 dark:hover:text-slate-300 tracking-widest bg-transparent shadow-none";
+
+    if (view === 'topics') {
+        topicsView.classList.remove('hidden');
         notebookView.classList.add('hidden');
+        btnTopics.className = activeClass;
+        btnNotebook.className = inactiveClass;
+    } else {
+        topicsView.classList.add('hidden');
+        notebookView.classList.remove('hidden');
+        btnNotebook.className = activeClass;
+        btnTopics.className = inactiveClass;
+        renderVocabList(); // Sử dụng chung 1 hàm render, không viết code thừa
     }
-}
-
-
-function renderNotebook() {
-    const container = document.getElementById('vocab-container');
-    const searchInput = document.getElementById('library-search');
-    if (!container) return;
-
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    const filteredList = vocabList.filter(item =>
-        item.word.toLowerCase().includes(searchTerm) || item.mean.toLowerCase().includes(searchTerm)
-    );
-
-    container.innerHTML = filteredList.map((item, idx) => `
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
-            <div>
-                <h4 class="font-black text-slate-800 dark:text-white text-sm">${item.word}</h4>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">${item.mean}</p>
-            </div>
-            <button onclick="speak('${item.word}')" class="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl">🔊</button>
-        </div>
-    `).join('');
-}
-
-function closeFlashcards() {
-    document.getElementById('flashcard-view').classList.add('hidden');
-    document.getElementById('library-topics-view').classList.remove('hidden');
 }
 
 /* [CỤC: RENDER_LOGIC] */
@@ -466,10 +447,12 @@ function startFlashcards(topic) {
     currentCardIndex = 0;
     switchTab('library');
 
+    const headerSection = document.getElementById('library-header-section');
     const topicView = document.getElementById('library-topics-view');
     const notebookView = document.getElementById('library-notebook-view');
     const flashView = document.getElementById('flashcard-view');
 
+    if (headerSection) headerSection.classList.add('hidden');
     if (topicView) topicView.classList.add('hidden');
     if (notebookView) notebookView.classList.add('hidden');
     if (flashView) flashView.classList.remove('hidden');
@@ -478,11 +461,14 @@ function startFlashcards(topic) {
 }
 
 function closeFlashcards() {
-    const topicView = document.getElementById('library-topics-view');
     const flashView = document.getElementById('flashcard-view');
+    const headerSection = document.getElementById('library-header-section');
     
     if (flashView) flashView.classList.add('hidden');
-    if (topicView) topicView.classList.remove('hidden');
+    if (headerSection) headerSection.classList.remove('hidden');
+    
+    // Luôn đưa người dùng quay lại màn hình "Chủ đề" sau khi tắt Flashcard
+    switchLibView('topics');
 }
 
 
