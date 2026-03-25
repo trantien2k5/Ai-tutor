@@ -1,0 +1,53 @@
+/* Tối ưu cho thiết bị di động */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Hiệu ứng chuyển cảnh đơn giản */
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tùy chỉnh thanh cuộn cho gọn */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* [CỤC: HOME_ANIMATIONS] */
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+.preserve-3d {
+    transform-style: preserve-3d;
+}
+
+.backface-hidden {
+    backface-visibility: hidden;
+}
+
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+/* Hiệu ứng bo góc cực đại cho dashboard */
+.rounded-dashboard {
+    border-radius: 2rem;
+}

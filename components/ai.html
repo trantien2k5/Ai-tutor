@@ -1,0 +1,60 @@
+<section id="tab-ai-gen" class="tab-content">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-black text-slate-800 tracking-tight">AI Lab ✨</h2>
+        <span
+            class="bg-emerald-100 text-emerald-600 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider">Online</span>
+    </div>
+
+    <div class="space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110">
+            </div>
+            <p class="text-[10px] font-black text-blue-500 uppercase mb-4 relative">Bước 1: Cấu hình yêu cầu</p>
+
+            <div class="space-y-4 relative">
+                <input type="text" id="user-topic" placeholder="Chủ đề (VD: Kinh tế, Phỏng vấn...)"
+                    class="w-full p-4 bg-slate-50 border-none rounded-xl font-bold text-slate-700 outline-none ring-2 ring-transparent focus:ring-blue-500 transition-all">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="user-level"
+                        class="p-3 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 outline-none">
+                        <option value="A1-A2">Cơ bản (A1-A2)</option>
+                        <option value="B1-B2" selected>Trung cấp (B1-B2)</option>
+                        <option value="C1-C2">Cao cấp (C1-C2)</option>
+                    </select>
+                    <select id="user-count"
+                        class="p-3 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 outline-none">
+                        <option value="5">5 từ mới</option>
+                        <option value="10">10 từ mới</option>
+                        <option value="15">15 từ mới</option>
+                    </select>
+                </div>
+
+                <button onclick="generatePrompt()"
+                    class="w-full bg-blue-600 text-white py-4 rounded-xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all uppercase text-xs tracking-widest">
+                    Tạo mã Prompt
+                </button>
+            </div>
+
+            <div id="prompt-output-area" class="mt-4 hidden animate-in fade-in slide-in-from-top-2">
+                <div class="bg-slate-900 p-4 rounded-xl relative group/code">
+                    <code id="generated-prompt"
+                        class="text-[11px] text-blue-300 block pr-10 leading-relaxed font-mono"></code>
+                    <button onclick="copyPrompt()"
+                        class="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all">📋</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-black text-emerald-500 uppercase mb-4">Bước 2: Nạp dữ liệu từ ChatGPT</p>
+            <textarea id="ai-input" rows="4" placeholder="Dán kết quả JSON vào đây..."
+                class="w-full p-4 bg-slate-50 border-none rounded-xl font-mono text-[11px] outline-none ring-2 ring-transparent focus:ring-emerald-500 transition-all"></textarea>
+            <button onclick="processVocab()"
+                class="mt-4 w-full bg-slate-800 text-white py-4 rounded-xl font-black hover:bg-black transition-all uppercase text-xs tracking-widest">
+                Đúc kết từ vựng
+            </button>
+        </div>
+    </div>
+</section>

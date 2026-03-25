@@ -1,0 +1,45 @@
+<section id="tab-library" class="tab-content hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Chủ đề học tập 📂</h2>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Chọn một chủ đề để bắt đầu</p>
+        </div>
+        <button onclick="toggleNotebook()" class="group flex items-center gap-2 bg-slate-900 dark:bg-blue-600 p-2 pr-4 rounded-full text-white shadow-lg active:scale-95 transition-all">
+            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">📓</div>
+            <span class="text-[10px] font-black uppercase tracking-tight">Sổ tay</span>
+        </button>
+    </div>
+
+    <div id="library-topics-view" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        </div>
+
+    <div id="library-notebook-view" class="hidden space-y-4">
+        <div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <input type="text" id="library-search" oninput="renderNotebook()" placeholder="Tìm trong sổ tay..." class="bg-transparent border-none outline-none text-sm px-2 w-full font-medium dark:text-white">
+            <button onclick="toggleNotebook()" class="text-[10px] font-black text-slate-400 uppercase px-2">Đóng</button>
+        </div>
+        <div id="vocab-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-10">
+            </div>
+    </div>
+
+    <div id="flashcard-view" class="hidden space-y-6 animate-in fade-in zoom-in duration-300">
+        <button onclick="closeFlashcards()" class="text-slate-400 font-bold text-[10px] uppercase flex items-center gap-2"><span>← Quay lại chủ đề</span></button>
+        <div class="perspective-1000 w-full h-80 cursor-pointer" onclick="flipCard()">
+            <div id="card-inner" class="relative w-full h-full transition-transform duration-500 preserve-3d shadow-xl rounded-[2.5rem]">
+                <div class="absolute w-full h-full backface-hidden bg-white dark:bg-slate-800 rounded-[2.5rem] border-2 border-blue-50 dark:border-slate-700 flex flex-col items-center justify-center p-6 text-center">
+                    <h3 id="card-front-word" class="text-4xl font-black text-slate-800 dark:text-white">---</h3>
+                    <p id="card-front-ipa" class="text-blue-500 font-mono mt-2">/---/</p>
+                </div>
+                <div class="absolute w-full h-full backface-hidden bg-blue-600 rounded-[2.5rem] flex flex-col items-center justify-center p-6 text-center text-white rotate-y-180">
+                    <p id="card-back-mean" class="text-2xl font-black mb-4">---</p>
+                    <p id="card-back-example" class="bg-white/10 p-4 rounded-2xl text-sm italic w-full">"---"</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center gap-4">
+            <button onclick="prevCard()" class="flex-1 p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl font-black text-slate-500">TRƯỚC</button>
+            <div id="card-progress" class="text-[10px] font-black text-slate-400 uppercase">0 / 0</div>
+            <button onclick="nextCard()" class="flex-1 p-4 bg-blue-600 rounded-2xl font-black text-white">SAU</button>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,105 @@
+<section id="tab-practice" class="tab-content hidden">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-black text-slate-800 dark:text-white">Luyện tập & Thi thử ✍️</h2>
+        <div id="quiz-timer"
+            class="hidden bg-red-50 text-red-600 text-xs font-black px-3 py-1 rounded-full border border-red-100">
+            00:00</div>
+    </div>
+
+    <div id="quiz-container">
+        <div id="quiz-setup"
+            class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="setQuizMode('learning', this)"
+                    class="q-mode-btn p-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold">📖
+                    Học tập</button>
+                <button onclick="setQuizMode('exam', this)"
+                    class="q-mode-btn p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 text-slate-500 font-bold">⏱️
+                    Thi thử</button>
+            </div>
+            <select id="quiz-topic-select"
+                class="w-full p-4 bg-slate-50 dark:bg-slate-900 dark:text-white rounded-2xl font-bold outline-none border border-slate-100 dark:border-slate-700"></select>
+            <div class="flex gap-2">
+                <button onclick="setQuizCount(10, this)"
+                    class="q-count-btn flex-1 p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 font-bold text-xs">10
+                    từ</button>
+                <button onclick="setQuizCount(20, this)"
+                    class="q-count-btn flex-1 p-3 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold text-xs">20
+                    từ</button>
+                <button onclick="setQuizCount(40, this)"
+                    class="q-count-btn flex-1 p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 font-bold text-xs">40
+                    từ</button>
+            </div>
+            <button onclick="initNewQuiz()"
+                class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg hover:scale-[1.02] transition-transform uppercase text-xs">BẮT
+                ĐẦU</button>
+        </div>
+
+        <div id="quiz-active" class="hidden space-y-4">
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                <div id="quiz-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%">
+                </div>
+            </div>
+
+            <div
+                class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm text-center">
+                <h3 id="quiz-q-word" class="text-4xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">---
+                </h3>
+                <p id="quiz-q-ipa" class="text-blue-500 font-mono text-sm mb-1">/---/</p>
+                <p id="quiz-q-type" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type
+                </p>
+            </div>
+
+            <div id="quiz-q-options" class="grid grid-cols-1 gap-3"></div>
+
+            <div id="quiz-explanation" class="hidden animate-in slide-in-from-bottom-5">
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-3xl border-2 border-blue-100 dark:border-blue-900 shadow-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <p id="explain-mean" class="text-lg font-black text-blue-700 dark:text-blue-400"></p>
+                        <button onclick="speak(quizState.pool[quizState.currentIdx-1].word)"
+                            class="p-2 bg-blue-50 rounded-full">🔊</button>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <p class="text-slate-600 dark:text-slate-300 italic" id="explain-example"></p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[11px]">
+                                <span class="font-bold text-emerald-600 uppercase">Đồng nghĩa:</span> <span
+                                    id="explain-synonyms"></span>
+                            </div>
+                            <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-[11px]">
+                                <span class="font-bold text-red-600 uppercase">Trái nghĩa:</span> <span
+                                    id="explain-antonyms"></span>
+                            </div>
+                        </div>
+                        <div
+                            class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-900/50">
+                            <p class="text-[10px] font-black text-amber-600 uppercase mb-1">💡 Ghi chú</p>
+                            <p id="explain-note" class="text-xs text-amber-800 dark:text-amber-200 font-medium">
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="renderQuizQuestion()"
+                        class="w-full mt-6 bg-slate-900 dark:bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">TIẾP
+                        TỤC ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz-result"
+            class="hidden bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm text-center space-y-6">
+            <div id="result-emoji" class="text-6xl">🏆</div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-800 dark:text-white">Hoàn thành!</h3>
+                <p id="result-summary" class="text-slate-500 font-medium"></p>
+            </div>
+            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                <p class="text-[10px] font-black text-blue-500 uppercase mb-1">Điểm số của bạn</p>
+                <p id="result-score" class="text-4xl font-black text-blue-600">0</p>
+            </div>
+            <button onclick="switchTab('practice'); location.reload();"
+                class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs">LÀM
+                ĐỀ KHÁC</button>
+        </div>
+    </div>
+</section>

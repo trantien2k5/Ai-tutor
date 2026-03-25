@@ -1,0 +1,30 @@
+<section id="tab-home" class="tab-content relative">
+    <div class="mb-8">
+        <p class="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Dashboard</p>
+        <h2 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Tổng quan 📊</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase mb-4">Mục tiêu hôm nay</p>
+            <div class="flex items-end gap-2">
+                <span id="home-count" class="text-5xl font-black text-blue-600">0</span>
+                <span class="text-slate-400 font-bold mb-1">/ 10 từ</span>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full mt-4 overflow-hidden">
+                <div id="goal-progress-bar" class="bg-blue-600 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="bg-blue-600 rounded-[2.5rem] p-6 text-white shadow-xl shadow-blue-200 dark:shadow-none">
+            <p class="text-[10px] font-bold opacity-80 uppercase mb-2">Mẹo học tập 💡</p>
+            <p class="text-sm font-medium leading-relaxed">Học theo chủ đề giúp não bộ liên kết thông tin tốt hơn 40% so với học từ rời rạc.</p>
+            <button onclick="switchTab('library')" class="mt-4 bg-white text-blue-600 px-4 py-2 rounded-full text-[10px] font-black uppercase">Học ngay</button>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Chủ đề của bạn</p>
+        <div id="topic-list-container" class="grid grid-cols-2 gap-4"></div>
+    </div>
+</section>
