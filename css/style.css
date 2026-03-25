@@ -1,101 +1,70 @@
-/* Tối ưu cho thiết bị di động */
-.pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+/* =========================================
+   1. UTILITIES & BASE
+   ========================================= */
+/* Tối ưu vùng an toàn trên iOS */
+.pb-safe { 
+    padding-bottom: env(safe-area-inset-bottom); 
 }
 
-/* Hiệu ứng chuyển cảnh đơn giản */
-.tab-content {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-/* Xóa transform để không gây lỗi 'fixed' cho phần tử con */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Tùy chỉnh thanh cuộn cho gọn */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
+/* Custom Scrollbar (Thanh cuộn gọn gàng) */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
 }
 
-/* [CỤC: HOME_ANIMATIONS] */
-.rotate-y-180 {
-    transform: rotateY(180deg);
+/* Mượt mà khi cuộn popup trên thiết bị cảm ứng */
+#flashcard-view { 
+    -webkit-overflow-scrolling: touch; 
 }
 
-.preserve-3d {
-    transform-style: preserve-3d;
+
+/* =========================================
+   2. ANIMATIONS (Toast & Tabs)
+   ========================================= */
+.tab-content { animation: fadeIn 0.3s ease-in-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.backface-hidden {
-    backface-visibility: hidden;
-}
-
-.perspective-1000 {
-    perspective: 1000px;
-}
-
-/* Hiệu ứng bo góc cực đại cho dashboard */
-.rounded-dashboard {
-    border-radius: 2rem;
-}
-
-/* [CỤC: TOAST_NOTIFICATIONS] */
-.toast-in {
-    animation: toastIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
-}
-
-.toast-out {
-    animation: toastOut 0.3s ease-in forwards;
-}
+.toast-in { animation: toastIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
+.toast-out { animation: toastOut 0.3s ease-in forwards; }
 
 @keyframes toastIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes toastOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    to {
-        opacity: 0;
-        transform: scale(0.8);
-    }
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.8); }
 }
 
-/* [CỤC: FLASHCARD_STYLING] */
+
+/* =========================================
+   3. FLASHCARD 3D MECHANICS
+   ========================================= */
+/* Các class tiện ích 3D dùng chung */
+.preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }
+
+/* Vùng chứa thẻ học */
 .flashcard-container {
     perspective: 2000px;
     width: 100%;
-    max-height: 60vh; /* Giới hạn chiều cao card để không bị đẩy nút xuống quá sâu */
+    max-height: 60vh;
 }
 
-/* Đảm bảo nội dung modal có thể cuộn nếu màn hình quá nhỏ */
-#flashcard-view {
-    -webkit-overflow-scrolling: touch;
-}
-
+/* Hiệu ứng lật nảy (Bouncy flip) */
 .flashcard-inner {
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Animation lật satisfy và mượt hơn */
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
 }
 
+/* Mặt trước và mặt sau của thẻ */
 .flashcard-front, .flashcard-back {
     position: absolute;
     width: 100%;
@@ -105,6 +74,7 @@
     flex-direction: column;
 }
 
+/* Decorate riêng cho 2 mặt */
 .flashcard-front {
     background: radial-gradient(circle at top right, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.8);
@@ -112,16 +82,4 @@
 
 .flashcard-back {
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.backface-hidden {
-    backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-    transform: rotateY(180deg);
-}
-
-.preserve-3d {
-    transform-style: preserve-3d;
 }
