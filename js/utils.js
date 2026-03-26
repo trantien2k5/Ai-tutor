@@ -1,3 +1,4 @@
+// Hiển thị thông báo (Toast)
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -16,34 +17,40 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Tải danh sách giọng đọc tiếng Anh
 function loadVoices() {
     voices = window.speechSynthesis.getVoices();
     const voiceSelect = document.getElementById('setting-voice');
     if (!voiceSelect) return;
+    
+    const settings = AppState.getSettings();
     const enVoices = voices.filter(v => v.lang.startsWith('en'));
-    voiceSelect.innerHTML = enVoices.map(v => `<option value="${v.name}" ${v.name === appSettings.voiceName ? 'selected' : ''}>${v.name} (${v.lang})</option>`).join('');
+    voiceSelect.innerHTML = enVoices.map(v => `<option value="${v.name}" ${v.name === settings.voiceName ? 'selected' : ''}>${v.name} (${v.lang})</option>`).join('');
 }
 
+// Phát âm thanh đọc từ vựng (TTS)
 function speak(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+        const settings = AppState.getSettings();
         const utterance = new SpeechSynthesisUtterance(text);
-        const selectedVoice = voices.find(v => v.name === appSettings.voiceName);
+        const selectedVoice = voices.find(v => v.name === settings.voiceName);
+        
         if (selectedVoice) utterance.voice = selectedVoice;
         utterance.lang = 'en-US';
-        utterance.rate = appSettings.ttsRate || 1.0;
+        utterance.rate = settings.ttsRate || 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
 
-// HÀM TẠO ÂM THANH HIỆU ỨNG (SFX) BẰNG WEB AUDIO API
+// Tạo âm thanh hiệu ứng đúng/sai (SFX)
 function playSound(type) {
-    // Nếu user đã tắt SFX trong cài đặt thì bỏ qua
-    if (!appSettings.sfxEnabled) return;
+    const settings = AppState.getSettings();
+    if (!settings.sfxEnabled) return;
     
     try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return; // Trình duyệt không hỗ trợ
+        if (!AudioContext) return; 
         const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -52,7 +59,6 @@ function playSound(type) {
         gain.connect(ctx.destination);
         
         if (type === 'success') {
-            // Tiếng "Ting" nhẹ nhàng, lên tông
             osc.type = 'sine';
             osc.frequency.setValueAtTime(600, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
@@ -61,7 +67,6 @@ function playSound(type) {
             osc.start(); 
             osc.stop(ctx.currentTime + 0.1);
         } else if (type === 'error') {
-            // Tiếng "Bíp" trầm, báo lỗi
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(300, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);

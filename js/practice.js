@@ -1,7 +1,6 @@
-/* =========================================
-   PRACTICE & EXAM LOGIC (ĐÃ TỐI ƯU THỰC TẾ)
-   ========================================= */
+// js/practice.js
 
+// Quản lý CSS nút bấm nhóm
 function toggleButtonGroup(selector, activeClassList, inactiveClassList, clickedBtn) {
     document.querySelectorAll(selector).forEach(b => {
         b.classList.remove(...activeClassList);
@@ -11,31 +10,35 @@ function toggleButtonGroup(selector, activeClassList, inactiveClassList, clicked
     clickedBtn.classList.add(...activeClassList);
 }
 
+// Cài đặt chế độ thi
 function setQuizMode(mode, btn) {
-    quizState.mode = mode;
+    AppState.updateQuiz({ mode: mode });
     const activeClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-600', 'dark:text-blue-400'];
     const inactiveClasses = ['border-slate-100', 'dark:border-slate-700', 'text-slate-400', 'bg-transparent'];
     toggleButtonGroup('.q-mode-btn', activeClasses, inactiveClasses, btn);
 }
 
+// Cài đặt số lượng câu
 function setQuizCount(num, btn) {
-    quizState.total = num;
+    AppState.updateQuiz({ total: num });
     const activeClasses = ['bg-white', 'dark:bg-slate-700', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm', 'border', 'border-slate-100', 'dark:border-slate-600'];
     const inactiveClasses = ['text-slate-500', 'dark:text-slate-400', 'bg-transparent', 'border-transparent', 'shadow-none'];
     toggleButtonGroup('.q-count-btn', activeClasses, inactiveClasses, btn);
 }
 
+// Đổ dữ liệu chủ đề vào select
 function updateQuizTopics() {
     const topicSelect = document.getElementById('quiz-topic-select');
     if (!topicSelect) return;
     
+    const vocabList = AppState.getVocab();
     const uniqueTopics = [...new Set(vocabList.map(v => v.topic || 'Chung'))];
     let optionsHTML = '<option value="all">🌐 Tất cả chủ đề (Trộn ngẫu nhiên)</option>';
     optionsHTML += uniqueTopics.map(t => `<option value="${t}">📂 Chủ đề: ${t}</option>`).join('');
     topicSelect.innerHTML = optionsHTML;
 }
 
-// THUẬT TOÁN SRS TÍNH TOÁN ĐỘ ƯU TIÊN
+// Tính toán độ ưu tiên từ vựng
 function calculateSRSPriority(word) {
     let score = 0;
     const now = new Date().getTime();
@@ -60,7 +63,10 @@ function calculateSRSPriority(word) {
     return score + Math.random(); 
 }
 
+// Khởi tạo bài thi mới
 function initNewQuiz() {
+    const vocabList = AppState.getVocab();
+    const quizState = AppState.getQuiz();
     const topic = document.getElementById('quiz-topic-select').value;
     let filtered = topic === 'all' ? [...vocabList] : vocabList.filter(v => (v.topic || 'Chung') === topic);
     
@@ -68,24 +74,30 @@ function initNewQuiz() {
         return showToast("⚠️ Cần ít nhất 4 từ để tạo đề trắc nghiệm!", 'error');
     }
 
-    // Sắp xếp bộ từ vựng theo SRS
     filtered.sort((a, b) => calculateSRSPriority(b) - calculateSRSPriority(a));
 
-    quizState.pool = filtered.slice(0, quizState.total);
-    quizState.currentIdx = 0;
-    quizState.score = 0;
-    quizState.wrongAnswers = []; 
+    AppState.updateQuiz({
+        pool: filtered.slice(0, quizState.total),
+        currentIdx: 0,
+        score: 0,
+        wrongAnswers: []
+    });
 
     document.getElementById('quiz-setup').classList.add('hidden');
     document.getElementById('quiz-active').classList.remove('hidden');
     
-    if (quizState.mode === 'exam') {
+    if (AppState.getQuiz().mode === 'exam') {
         startTimer();
     }
     renderQuizQuestion();
 }
 
+// Render câu hỏi hiện tại
 function renderQuizQuestion() {
+    const quizState = AppState.getQuiz();
+    const settings = AppState.getSettings();
+    const vocabList = AppState.getVocab();
+
     if (quizState.currentIdx >= quizState.pool.length) {
         return finishQuiz();
     }
@@ -109,7 +121,6 @@ function renderQuizQuestion() {
     options = [...options, ...distractors.sort(() => 0.5 - Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
 
     if (optionsContainer) {
-        // Tối ưu UI thực tế: Các nút to, min-h-[80px], font to rõ ràng
         optionsContainer.innerHTML = options.map(opt => {
             const escapedOpt = opt.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             return `
@@ -120,48 +131,54 @@ function renderQuizQuestion() {
         }).join('');
     }
 
-    if (appSettings.autoSpeak) speak(wordObj.word);
+    if (settings.autoSpeak) speak(wordObj.word);
 }
 
+// Xử lý logic chọn đáp án
 function handleQuizAnswer(selected, btn) {
+    const quizState = AppState.getQuiz();
+    const settings = AppState.getSettings();
+    const vocabList = AppState.getVocab();
+
     const wordObj = quizState.pool[quizState.currentIdx];
     const isCorrect = (selected === wordObj.mean);
     
     document.querySelectorAll('.quiz-opt-btn').forEach(b => b.disabled = true);
     
-    if (wordObj.masteryLevel === undefined) wordObj.masteryLevel = 0;
-    wordObj.lastReviewed = new Date().toISOString();
+    const vocabIndex = vocabList.findIndex(v => v.word === wordObj.word);
+    if (vocabIndex !== -1) {
+        if (vocabList[vocabIndex].masteryLevel === undefined) vocabList[vocabIndex].masteryLevel = 0;
+        vocabList[vocabIndex].lastReviewed = new Date().toISOString();
 
-    if (isCorrect) {
-        quizState.score++;
-        wordObj.masteryLevel += 1; 
-        
-        // Phát âm thanh đúng
-        if(typeof playSound === 'function') playSound('success');
+        if (isCorrect) {
+            AppState.updateQuiz({ score: quizState.score + 1 });
+            vocabList[vocabIndex].masteryLevel += 1; 
+            if(typeof playSound === 'function') playSound('success');
 
-        btn.classList.replace('border-slate-100', 'border-emerald-500');
-        btn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
-    } else {
-        wordObj.masteryLevel = Math.max(-2, wordObj.masteryLevel - 1); 
-        
-        // Phát âm thanh sai
-        if(typeof playSound === 'function') playSound('error');
-        
-        quizState.wrongAnswers.push({
-            word: wordObj.word,
-            correct: wordObj.mean,
-            wrongSelected: selected
-        });
-        
-        btn.classList.replace('border-slate-100', 'border-red-500');
-        btn.classList.add('bg-red-50', 'text-red-700', 'dark:bg-red-900/20', 'dark:text-red-400');
-        
-        document.querySelectorAll('.quiz-opt-btn').forEach(b => {
-            if (b.innerText.trim() === wordObj.mean) {
-                b.classList.replace('border-slate-100', 'border-emerald-500');
-                b.classList.add('border-dashed', 'bg-emerald-50/50', 'dark:bg-emerald-900/10');
-            }
-        });
+            btn.classList.replace('border-slate-100', 'border-emerald-500');
+            btn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
+        } else {
+            vocabList[vocabIndex].masteryLevel = Math.max(-2, vocabList[vocabIndex].masteryLevel - 1); 
+            if(typeof playSound === 'function') playSound('error');
+            
+            const newWrong = [...quizState.wrongAnswers, {
+                word: wordObj.word,
+                correct: wordObj.mean,
+                wrongSelected: selected
+            }];
+            AppState.updateQuiz({ wrongAnswers: newWrong });
+            
+            btn.classList.replace('border-slate-100', 'border-red-500');
+            btn.classList.add('bg-red-50', 'text-red-700', 'dark:bg-red-900/20', 'dark:text-red-400');
+            
+            document.querySelectorAll('.quiz-opt-btn').forEach(b => {
+                if (b.innerText.trim() === wordObj.mean) {
+                    b.classList.replace('border-slate-100', 'border-emerald-500');
+                    b.classList.add('border-dashed', 'bg-emerald-50/50', 'dark:bg-emerald-900/10');
+                }
+            });
+        }
+        AppState.setVocab(vocabList);
     }
 
     if (quizState.mode === 'learning') {
@@ -170,8 +187,7 @@ function handleQuizAnswer(selected, btn) {
             const explain = document.getElementById('quiz-explanation');
             
             document.getElementById('explain-mean').innerText = wordObj.mean;
-            // Áp dụng Cài đặt: Ẩn/hiện ví dụ
-            document.getElementById('explain-example').innerText = (!appSettings.showExample) ? "Đã tắt hiển thị ví dụ trong cài đặt." : (wordObj.example ? `"${wordObj.example}"` : "Không có ví dụ.");
+            document.getElementById('explain-example').innerText = (!settings.showExample) ? "Đã tắt hiển thị ví dụ trong cài đặt." : (wordObj.example ? `"${wordObj.example}"` : "Không có ví dụ.");
             
             document.getElementById('explain-synonyms').innerText = (wordObj.synonyms && wordObj.synonyms !== 'None') ? wordObj.synonyms : 'N/A';
             document.getElementById('explain-antonyms').innerText = (wordObj.antonyms && wordObj.antonyms !== 'None') ? wordObj.antonyms : 'N/A';
@@ -185,21 +201,19 @@ function handleQuizAnswer(selected, btn) {
             }
             
             explain.classList.remove('hidden');
-            quizState.currentIdx++;
+            AppState.updateQuiz({ currentIdx: quizState.currentIdx + 1 });
         }, 600);
     } else {
-        quizState.currentIdx++;
-        // ÁP DỤNG CÀI ĐẶT: Thời gian chuyển câu trắc nghiệm
-        const delayTime = appSettings.autoNextDelay || 1000;
+        AppState.updateQuiz({ currentIdx: quizState.currentIdx + 1 });
+        const delayTime = settings.autoNextDelay || 1000;
         setTimeout(renderQuizQuestion, delayTime);
     }
 }
 
+// Chạy đồng hồ tính giờ
 function startTimer() {
-    // TỐI ƯU THỰC TẾ: Thời gian tỷ lệ thuận với số câu (Mỗi câu cho phép tối đa 10 giây)
+    const quizState = AppState.getQuiz();
     const TIME_LIMIT = quizState.pool.length * 10; 
-    
-    quizState.startTime = new Date();
     
     const timerContainer = document.getElementById('quiz-timer');
     const timerText = document.getElementById('timer-text');
@@ -211,12 +225,13 @@ function startTimer() {
 
     if (quizState.timerInterval) clearInterval(quizState.timerInterval);
     
-    quizState.timerInterval = setInterval(() => {
-        const passed = Math.floor((new Date() - quizState.startTime) / 1000);
+    const startTime = new Date();
+    const timerInterval = setInterval(() => {
+        const passed = Math.floor((new Date() - startTime) / 1000);
         const remain = TIME_LIMIT - passed;
         
         if (remain <= 0) {
-            clearInterval(quizState.timerInterval);
+            clearInterval(timerInterval);
             if (timerText) timerText.innerText = "00:00";
             showToast("⏳ Hết giờ! Tự động nộp bài.", "error");
             finishQuiz();
@@ -232,9 +247,13 @@ function startTimer() {
             timerText.innerText = `${Math.floor(remain / 60).toString().padStart(2, '0')}:${(remain % 60).toString().padStart(2, '0')}`;
         }
     }, 1000);
+
+    AppState.updateQuiz({ timerInterval: timerInterval, startTime: startTime });
 }
 
+// Kết thúc bài thi
 function finishQuiz() {
+    const quizState = AppState.getQuiz();
     if (quizState.timerInterval) clearInterval(quizState.timerInterval);
     
     document.getElementById('quiz-active').classList.add('hidden');
@@ -271,32 +290,23 @@ function finishQuiz() {
         wrongAnsContainer.classList.add('hidden');
     }
 
-    if(typeof saveVocabToStorage === "function") {
-        saveVocabToStorage();
-    } else {
-        localStorage.setItem('my_vocab', JSON.stringify(vocabList));
-    }
-
     if (typeof checkAndUpdateStreak === "function") checkAndUpdateStreak();
 }
 
-// HÀM MỚI: Thoát bài thi ngang chừng
+// Thoát bài thi ngang chừng
 function exitQuiz() {
+    const quizState = AppState.getQuiz();
     if (confirm('Bạn có chắc muốn dừng lại? Tiến độ bài thi này sẽ không được lưu.')) {
-        // 1. Xóa bộ đếm giờ (Tránh lỗi đồng hồ vẫn chạy ngầm)
         if (quizState.timerInterval) {
             clearInterval(quizState.timerInterval);
         }
         
-        // 2. Ẩn giao diện Đang thi & Đồng hồ
         document.getElementById('quiz-active').classList.add('hidden');
         const timerContainer = document.getElementById('quiz-timer');
         if (timerContainer) timerContainer.classList.add('hidden');
         
-        // 3. Hiện lại giao diện Cấu hình ban đầu
         document.getElementById('quiz-setup').classList.remove('hidden');
         
-        // 4. Reset các hiệu ứng nút bấm (nếu có bị dính màu xanh/đỏ)
         document.querySelectorAll('.quiz-opt-btn').forEach(b => {
             b.disabled = false;
         });

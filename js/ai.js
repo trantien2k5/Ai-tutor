@@ -1,5 +1,6 @@
-function generatePrompt() {
-    const topic = document.getElementById('user-topic').value || 'General';
+// Tạo prompt và copy thẳng vào bộ nhớ tạm
+function copyDynamicPrompt() {
+    const topic = document.getElementById('user-topic').value.trim() || 'General vocabulary';
     const level = document.getElementById('user-level').value;
     const count = document.getElementById('user-count').value;
 
@@ -8,7 +9,7 @@ CRITICAL RULES:
 1. Mix word types.
 2. "type" MUST be an abbreviation (n, v, adj, adv).
 3. "mean" and "note" MUST be in Vietnamese.
-4. Output ONLY a valid raw JSON array. NO markdown, NO code blocks (do NOT use \`\`\`json), NO conversational text.
+4. Output ONLY a valid raw JSON array. NO markdown, NO code blocks, NO conversational text.
 
 Format EXACTLY like this:
 [
@@ -24,49 +25,54 @@ Format EXACTLY like this:
   }
 ]`;
 
-    const promptCode = document.getElementById('generated-prompt');
-    if (promptCode) {
-        promptCode.innerText = prompt;
-        document.getElementById('prompt-output-area').classList.remove('hidden');
-    }
+    navigator.clipboard.writeText(prompt).then(() => {
+        showToast('📋 Đã copy mã Prompt! Hãy dán vào ChatGPT.');
+    }).catch(err => {
+        showToast('❌ Lỗi copy. Vui lòng thử lại!', 'error');
+    });
 }
 
-function copyPrompt() {
-    navigator.clipboard.writeText(document.getElementById('generated-prompt').innerText);
-    showToast('📋 Đã copy prompt nâng cao!');
-}
-
+// Xử lý chuỗi JSON từ AI và lưu vào Database
 function processVocab() {
     const inputArea = document.getElementById('ai-input');
     const topicInput = document.getElementById('user-topic');
-    const levelInput = document.getElementById('user-level'); // Bắt thêm thông tin Level
+    const levelInput = document.getElementById('user-level');
 
-    if (!inputArea || !inputArea.value) return;
+    if (!inputArea || !inputArea.value.trim()) {
+        showToast('⚠️ Vui lòng dán kết quả từ AI vào ô!', 'error');
+        return;
+    }
+
     try {
         let rawData = inputArea.value.trim();
-        // Xử lý rác markdown từ LLMs
-        if (rawData.startsWith('```')) rawData = rawData.replace(/```json|```/g, '').trim();
-        const newData = JSON.parse(rawData);
+        
+        // Cắt bỏ phần text chat thừa của AI (nếu AI không tuân thủ rule)
+        const startIndex = rawData.indexOf('[');
+        const endIndex = rawData.lastIndexOf(']');
+        if (startIndex !== -1 && endIndex !== -1) {
+            rawData = rawData.substring(startIndex, endIndex + 1);
+        }
 
-        const currentTopic = topicInput.value.trim() || 'General';
+        const newData = JSON.parse(rawData);
+        const currentTopic = topicInput.value.trim() || 'Chung';
         const currentLevel = levelInput ? levelInput.value : 'B1-B2';
+        
+        const currentVocab = AppState.getVocab();
 
         if (Array.isArray(newData)) {
             let addedCount = 0;
             let duplicateCount = 0;
 
-            // Đúc kết và chuẩn hóa từng từ vựng
             const enrichedData = newData.map(item => {
-                // Check trùng lặp: Tìm xem từ này đã có trong máy chưa (không phân biệt hoa thường)
-                const isExist = vocabList.some(v => v.word.toLowerCase() === item.word.toLowerCase());
+                const isExist = currentVocab.some(v => v.word.toLowerCase() === item.word.toLowerCase());
                 if (isExist) {
                     duplicateCount++;
-                    return null; // Trùng thì bỏ qua
+                    return null; 
                 }
 
                 addedCount++;
                 return {
-                    id: 'vocab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), // Tạo ID duy nhất
+                    id: 'vocab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                     word: item.word || 'Unknown',
                     ipa: item.ipa || '/.../',
                     type: item.type || 'n',
@@ -76,34 +82,34 @@ function processVocab() {
                     example: item.example || '',
                     note: item.note || '',
                     topic: currentTopic,
-                    level: currentLevel,          // Lưu lại độ khó
-                    createdAt: new Date().toISOString(), // Phục vụ sort/filter theo thời gian sau này
-                    masteryLevel: 0,              // Khởi tạo điểm thông thạo = 0 cho SRS
-                    lastReviewed: null            // Thời điểm ôn tập cuối cùng
+                    level: currentLevel,          
+                    createdAt: new Date().toISOString(), 
+                    masteryLevel: 0,              
+                    lastReviewed: null            
                 };
-            }).filter(item => item !== null); // Xóa các object bị null do trùng lặp
+            }).filter(item => item !== null); 
 
             if (enrichedData.length === 0) {
                 showToast('⚠️ Các từ vựng này đã có sẵn trong thư viện!', 'error');
                 return;
             }
 
-            // Gộp data mới lên đầu danh sách
-            vocabList = [...enrichedData, ...vocabList];
-            localStorage.setItem('my_vocab', JSON.stringify(vocabList));
-            inputArea.value = '';
+            AppState.setVocab([...enrichedData, ...currentVocab]);
             
+            inputArea.value = '';
             refreshAllUI();
             
-            // Báo cáo chi tiết số lượng từ thêm thành công và trùng lặp
             const msg = duplicateCount > 0 
                 ? `🎉 Nạp ${addedCount} từ mới (Bỏ qua ${duplicateCount} từ trùng)`
                 : `🎉 Nạp thành công ${addedCount} từ vựng mới!`;
             showToast(msg);
             
             switchTab('library');
+        } else {
+             showToast('❌ Kết quả không đúng định dạng danh sách (Array).', 'error'); 
         }
     } catch (e) { 
-        showToast('❌ Lỗi: Dữ liệu JSON không hợp lệ!', 'error'); 
+        showToast('❌ Lỗi: Mã JSON không hợp lệ! Hãy kiểm tra lại kết quả của AI.', 'error'); 
+        console.error("Parse Error:", e);
     }
 }

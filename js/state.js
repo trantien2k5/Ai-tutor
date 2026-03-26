@@ -1,29 +1,43 @@
-/* =========================================
-   GLOBAL STATE (Quản lý Trạng thái Ứng dụng)
-   ========================================= */
+// Quản lý trạng thái toàn cục (State Management)
+const AppState = (function() {
+    let vocabList = StorageAPI.getVocab();
+    let appSettings = StorageAPI.getSettings();
+    let quizState = {
+        pool: [],
+        currentIdx: 0,
+        score: 0,
+        wrongAnswers: [],
+        mode: 'exam',
+        total: 10,
+        timerInterval: null,
+        startTime: null
+    };
 
-// 1. Tự động lấy dữ liệu từ Storage đẩy lên RAM ngay khi web tải xong
-let vocabList = StorageAPI.getVocab();
-let appSettings = StorageAPI.getSettings();
+    return {
+        // Lấy danh sách từ vựng hiện tại
+        getVocab: () => vocabList,
+        
+        // Cập nhật và tự động lưu danh sách từ vựng mới
+        setVocab: (data) => {
+            vocabList = data;
+            StorageAPI.saveVocab(vocabList);
+        },
 
-// 2. State bài thi (Dữ liệu tạm thời, F5 là mất, không cần lưu ổ cứng)
-let quizState = {
-    pool: [],
-    currentIdx: 0,
-    score: 0,
-    wrongAnswers: [],
-    mode: 'exam',
-    total: 10,
-    timerInterval: null,
-    startTime: null
-};
+        // Lấy cấu hình ứng dụng
+        getSettings: () => appSettings,
+        
+        // Ghi đè và tự động lưu cấu hình
+        updateSettings: (updates) => {
+            appSettings = { ...appSettings, ...updates };
+            StorageAPI.saveSettings(appSettings);
+        },
 
-// 3. CÁC HÀM TIỆN ÍCH (Giúp các file cũ không bị báo lỗi)
-// Thay vì phải đi sửa localStorage ở hàng chục file, ta chỉ cần gọi 2 hàm này:
-function saveVocabToStorage() {
-    StorageAPI.saveVocab(vocabList);
-}
-
-function saveSettingsToStorage() {
-    StorageAPI.saveSettings(appSettings);
-}
+        // Lấy trạng thái bài thi
+        getQuiz: () => quizState,
+        
+        // Cập nhật trạng thái bài thi
+        updateQuiz: (updates) => {
+            quizState = { ...quizState, ...updates };
+        }
+    };
+})();

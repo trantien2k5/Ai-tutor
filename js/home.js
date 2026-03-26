@@ -1,32 +1,26 @@
-/* =========================================
-   HOME (DASHBOARD) LOGIC (LIGHT & CLEAN UI)
-   ========================================= */
+// js/home.js
 
+// Cập nhật các thống kê trên trang chủ
 function updateStats() {
     const container = document.getElementById('topic-list-container');
     if (!container) return;
 
+    const vocabList = AppState.getVocab();
+    const settings = AppState.getSettings();
+
     const topics = [...new Set(vocabList.map(v => v.topic || 'Chung'))];
     const totalWords = vocabList.length;
-    const dailyGoal = appSettings.dailyGoal || 10;
-    
+    const dailyGoal = settings.dailyGoal || 10;
     const masteredWords = vocabList.filter(v => v.masteryLevel && v.masteryLevel > 0).length;
 
-    const statWordsEl = document.getElementById('stat-total-words');
-    const statTopicsEl = document.getElementById('stat-total-topics');
-    const statMasteredEl = document.getElementById('stat-mastered-words');
-    
-    if (statWordsEl) statWordsEl.innerText = totalWords;
-    if (statTopicsEl) statTopicsEl.innerText = topics.length;
-    if (statMasteredEl) statMasteredEl.innerText = masteredWords;
+    const setHtml = (id, val) => { if (document.getElementById(id)) document.getElementById(id).innerText = val; };
+    setHtml('stat-total-words', totalWords);
+    setHtml('stat-total-topics', topics.length);
+    setHtml('stat-mastered-words', masteredWords);
+    setHtml('home-count', totalWords);
+    setHtml('home-goal-text', `/ ${dailyGoal} từ mục tiêu`);
 
-    const homeCount = document.getElementById('home-count');
-    const goalText = document.getElementById('home-goal-text');
     const progressBar = document.getElementById('goal-progress-bar');
-    
-    if (homeCount) homeCount.innerText = totalWords;
-    if (goalText) goalText.innerText = `/ ${dailyGoal} từ mục tiêu`;
-    
     if (progressBar) {
         const percent = Math.min((totalWords / dailyGoal) * 100, 100);
         setTimeout(() => { progressBar.style.width = percent + '%'; }, 100);
@@ -65,7 +59,6 @@ function updateStats() {
         tipEl.dataset.loaded = "true"; 
     }
 
-    // RENDER THẺ CHỦ ĐỀ SÁNG SỦA, TINH TẾ
     if (topics.length === 0) {
         container.innerHTML = `
             <div class="col-span-full py-12 bg-white dark:bg-slate-800 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-700 text-center shadow-sm">
@@ -76,12 +69,8 @@ function updateStats() {
         return;
     }
 
-    const topTopics = topics.slice(0, 6);
-
-    container.innerHTML = topTopics.map((topic, index) => {
+    container.innerHTML = topics.slice(0, 6).map((topic, index) => {
         const count = vocabList.filter(v => (v.topic || 'Chung') === topic).length;
-        
-        // Tone màu Pastel dịu mắt, sang trọng
         const colorPresets = [
             { bg: 'bg-blue-50 text-blue-500 border-blue-100', glow: 'from-blue-50 to-white' },
             { bg: 'bg-emerald-50 text-emerald-500 border-emerald-100', glow: 'from-emerald-50 to-white' },
@@ -93,16 +82,11 @@ function updateStats() {
 
         return `
             <div onclick="startFlashcards('${topic}')" class="group relative overflow-hidden bg-white dark:bg-slate-800 p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 hover:border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[140px]">
-                
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${theme.glow} dark:from-slate-700 dark:to-slate-800 rounded-full blur-2xl -z-10 transition-transform duration-500 group-hover:scale-150 opacity-60 -mr-10 -mt-10"></div>
-                
                 <div class="flex justify-between items-start mb-4">
-                    <div class="w-10 h-10 ${theme.bg} dark:bg-slate-900/50 border dark:border-slate-700 rounded-[0.8rem] flex items-center justify-center text-xl group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                        📁
-                    </div>
+                    <div class="w-10 h-10 ${theme.bg} dark:bg-slate-900/50 border dark:border-slate-700 rounded-[0.8rem] flex items-center justify-center text-xl group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 shadow-sm">📁</div>
                     <span class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:text-slate-600 transition-colors">${count} từ</span>
                 </div>
-                
                 <div>
                     <h3 class="font-black text-slate-800 dark:text-white text-sm md:text-base uppercase tracking-tight truncate pr-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title="${topic}">${topic}</h3>
                     <div class="mt-3 flex items-center justify-between">
@@ -114,56 +98,57 @@ function updateStats() {
     }).join('');
 }
 
-// --- HỆ THỐNG STREAK --- //
+// Cập nhật giao diện chuỗi ngày học
 function renderStreakUI() {
     const streakEl = document.getElementById('streak-count');
     if (!streakEl) return;
     
-    if (appSettings.streak === undefined) appSettings.streak = 0;
+    const settings = AppState.getSettings();
+    if (settings.streak === undefined) settings.streak = 0;
     
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
-    let displayStreak = appSettings.streak || 0;
+    let displayStreak = settings.streak || 0;
     
-    if (appSettings.lastStudyDate !== today && appSettings.lastStudyDate !== yesterdayStr && appSettings.lastStudyDate !== null) {
+    if (settings.lastStudyDate !== today && settings.lastStudyDate !== yesterdayStr && settings.lastStudyDate !== null) {
         displayStreak = 0; 
-        appSettings.streak = 0; 
-        localStorage.setItem('app_settings', JSON.stringify(appSettings));
+        AppState.updateSettings({ streak: 0 });
     }
     
     streakEl.innerText = displayStreak;
 }
 
+// Kiểm tra và tăng chuỗi ngày học
 function checkAndUpdateStreak() {
-    if (appSettings.streak === undefined) appSettings.streak = 0;
-    if (appSettings.lastStudyDate === undefined) appSettings.lastStudyDate = null;
+    const settings = AppState.getSettings();
+    let currentStreak = settings.streak || 0;
+    let lastDate = settings.lastStudyDate || null;
 
     const today = new Date().toISOString().split('T')[0];
     let streakMsg = "";
 
-    if (appSettings.lastStudyDate !== today) {
-        if (!appSettings.lastStudyDate || appSettings.streak === 0) {
-            appSettings.streak = 1;
+    if (lastDate !== today) {
+        if (!lastDate || currentStreak === 0) {
+            currentStreak = 1;
             streakMsg = "🔥 Khởi đầu tuyệt vời! Bạn đã có chuỗi 1 ngày.";
         } else {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-            if (appSettings.lastStudyDate === yesterdayStr) {
-                appSettings.streak += 1;
-                streakMsg = `🔥 Cháy quá! Chuỗi ${appSettings.streak} ngày liên tiếp!`;
+            if (lastDate === yesterdayStr) {
+                currentStreak += 1;
+                streakMsg = `🔥 Cháy quá! Chuỗi ${currentStreak} ngày liên tiếp!`;
             } else {
-                appSettings.streak = 1;
+                currentStreak = 1;
                 streakMsg = "🔥 Bắt đầu lại chuỗi mới nhé. Đừng bỏ cuộc!";
             }
         }
         
-        appSettings.lastStudyDate = today;
-        localStorage.setItem('app_settings', JSON.stringify(appSettings));
+        AppState.updateSettings({ streak: currentStreak, lastStudyDate: today });
         
         renderStreakUI();
         if (streakMsg && typeof showToast === "function") showToast(streakMsg, 'success');

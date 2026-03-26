@@ -1,17 +1,19 @@
-/* =========================================
-   FLASHCARD MODULE & SETTINGS INTEGRATION
-   ========================================= */
-let autoFlipTimer = null; // Biến giữ đồng hồ tự lật thẻ
+// js/flashcard.js
+let autoFlipTimer = null; 
+let currentSessionWords = [];
+let currentCardIndex = 0;
 
+// Khởi chạy chế độ Flashcard
 function startFlashcards(topic) {
+    const vocabList = AppState.getVocab();
+    const settings = AppState.getSettings();
+
     let words = vocabList.filter(v => (v.topic || 'Chung') === topic);
     if (words.length === 0) return showToast("📂 Chủ đề này chưa có từ!", 'error');
 
-    // 1. TÍNH NĂNG: LUÔN XÁO TRỘN THẺ (SHUFFLE)
-    if (appSettings.shuffleFlashcards) {
+    if (settings.shuffleFlashcards) {
         words.sort(() => 0.5 - Math.random());
     } 
-    // Nếu không bật trộn cứng, ưu tiên dùng thuật toán SRS
     else if (typeof calculateSRSPriority === "function") {
         words.sort((a, b) => calculateSRSPriority(b) - calculateSRSPriority(a));
     }
@@ -28,8 +30,9 @@ function startFlashcards(topic) {
     showCard();
 }
 
+// Đóng chế độ Flashcard
 function closeFlashcards() {
-    clearTimeout(autoFlipTimer); // Xóa đồng hồ tự lật nếu đang chạy
+    clearTimeout(autoFlipTimer); 
     const flashView = document.getElementById('flashcard-view');
     if (flashView) {
         flashView.classList.add('hidden');
@@ -38,21 +41,21 @@ function closeFlashcards() {
     if (typeof checkAndUpdateStreak === "function") checkAndUpdateStreak();
 }
 
+// Hiển thị từ vựng hiện tại lên thẻ
 function showCard() {
-    clearTimeout(autoFlipTimer); // Reset bộ đếm tự lật mỗi khi sang thẻ mới
+    clearTimeout(autoFlipTimer); 
+    const settings = AppState.getSettings();
     const card = currentSessionWords[currentCardIndex];
     if (!card) return;
 
     const inner = document.getElementById('card-inner');
     
-    // 2. TÍNH NĂNG: GIẢM HOẠT ẢNH (REDUCE MOTION)
-    if (appSettings.reduceMotion) {
-        inner.style.transition = 'none'; // Tắt hiệu ứng 3D lật mượt
+    if (settings.reduceMotion) {
+        inner.style.transition = 'none'; 
     } else {
         inner.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
     }
 
-    // Ép thẻ về mặt trước
     if (inner && inner.classList.contains('rotate-y-180')) {
         let oldTransition = inner.style.transition;
         inner.style.transition = 'none'; 
@@ -61,7 +64,6 @@ function showCard() {
         inner.style.transition = oldTransition; 
     }
 
-    // Reset UI Bảng điều khiển
     const ctrlFront = document.getElementById('flashcard-controls-front');
     const ctrlBack = document.getElementById('flashcard-controls-back');
     if (ctrlFront && ctrlBack) {
@@ -76,24 +78,19 @@ function showCard() {
 
     const setHtml = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
 
-    // 3. TÍNH NĂNG: CỠ CHỮ & ẨN HIỆN IPA/VÍ DỤ
     const wordEl = document.getElementById('card-front-word');
     const ipaEl = document.getElementById('card-front-ipa');
     const ipaBackEl = document.getElementById('card-back-type-ipa');
     const exampleBox = document.getElementById('card-back-example').parentElement;
     
     if (wordEl) {
-        wordEl.className = `font-black text-slate-800 dark:text-white tracking-tight break-words w-full leading-tight ${appSettings.fontSize === 'lg' ? 'text-5xl sm:text-6xl' : (appSettings.fontSize === 'sm' ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl')}`;
+        wordEl.className = `font-black text-slate-800 dark:text-white tracking-tight break-words w-full leading-tight ${settings.fontSize === 'lg' ? 'text-5xl sm:text-6xl' : (settings.fontSize === 'sm' ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl')}`;
     }
 
-    // Ẩn/Hiện Phiên âm
-    if (ipaEl) ipaEl.style.display = appSettings.showIPA ? 'block' : 'none';
-    if (ipaBackEl) ipaBackEl.style.display = appSettings.showIPA ? 'block' : 'none';
-    
-    // Ẩn/Hiện Ví dụ
-    if (exampleBox) exampleBox.style.display = appSettings.showExample ? 'block' : 'none';
+    if (ipaEl) ipaEl.style.display = settings.showIPA ? 'block' : 'none';
+    if (ipaBackEl) ipaBackEl.style.display = settings.showIPA ? 'block' : 'none';
+    if (exampleBox) exampleBox.style.display = settings.showExample ? 'block' : 'none';
 
-    // Đổ dữ liệu
     setHtml('card-front-word', card.word);
     setHtml('card-front-ipa', card.ipa || '/.../');
     setHtml('card-front-type', card.type || 'n');
@@ -119,22 +116,23 @@ function showCard() {
     const progBar = document.getElementById('card-progress-bar');
     if(progBar) progBar.style.width = `${(current / total) * 100}%`;
 
-    if (appSettings.autoSpeak) speak(card.word);
+    if (settings.autoSpeak) speak(card.word);
 
-    // 4. TÍNH NĂNG: TỰ ĐỘNG LẬT THẺ
-    if (appSettings.autoFlip !== 'off') {
-        const delay = parseInt(appSettings.autoFlip) * 1000;
+    if (settings.autoFlip !== 'off') {
+        const delay = parseInt(settings.autoFlip) * 1000;
         autoFlipTimer = setTimeout(() => {
             const innerCheck = document.getElementById('card-inner');
             if (innerCheck && !innerCheck.classList.contains('rotate-y-180')) {
-                flipCard(); // Tự gọi hàm lật mặt
+                flipCard(); 
             }
         }, delay);
     }
 }
 
+// Xử lý hiệu ứng lật mặt thẻ
 function flipCard() {
-    clearTimeout(autoFlipTimer); // Hủy tự lật nếu user đã tự bấm lật
+    clearTimeout(autoFlipTimer); 
+    const settings = AppState.getSettings();
     const inner = document.getElementById('card-inner');
     if(!inner) return;
     
@@ -163,28 +161,31 @@ function flipCard() {
     }
 
     const card = currentSessionWords[currentCardIndex];
-    if (card && isFlippingToBack && !appSettings.autoSpeak) {
+    if (card && isFlippingToBack && !settings.autoSpeak) {
         speak(card.word);
     }
 }
 
+// Chấm điểm độ thành thạo từ vựng
 function rateFlashcard(score) {
+    const vocabList = AppState.getVocab();
     const card = currentSessionWords[currentCardIndex];
+    
     if (card) {
-        if (card.masteryLevel === undefined) card.masteryLevel = 0;
-        card.masteryLevel += score;
-        if (card.masteryLevel < -2) card.masteryLevel = -2;
-        card.lastReviewed = new Date().toISOString();
-
-        if (typeof saveVocabToStorage === "function") {
-            saveVocabToStorage();
-        } else {
-            localStorage.setItem('my_vocab', JSON.stringify(vocabList));
+        const vocabIndex = vocabList.findIndex(v => v.word === card.word);
+        if (vocabIndex !== -1) {
+            if (vocabList[vocabIndex].masteryLevel === undefined) vocabList[vocabIndex].masteryLevel = 0;
+            vocabList[vocabIndex].masteryLevel += score;
+            if (vocabList[vocabIndex].masteryLevel < -2) vocabList[vocabIndex].masteryLevel = -2;
+            vocabList[vocabIndex].lastReviewed = new Date().toISOString();
+            
+            AppState.setVocab(vocabList);
         }
     }
     nextCard();
 }
 
+// Chuyển thẻ tiếp theo
 function nextCard() {
     if (currentCardIndex < currentSessionWords.length - 1) {
         currentCardIndex++;
@@ -195,6 +196,7 @@ function nextCard() {
     }
 }
 
+// Lùi thẻ trước đó
 function prevCard() {
     if (currentCardIndex > 0) {
         currentCardIndex--;
