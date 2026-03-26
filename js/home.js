@@ -90,3 +90,64 @@ function updateStats() {
             </div>`;
     }).join('');
 }
+
+
+// --- HỆ THỐNG STREAK (CHUỖI NGÀY HỌC) --- //
+
+// Đảm bảo appSettings có đủ biến khi khởi tạo
+if (appSettings.streak === undefined) appSettings.streak = 0;
+if (appSettings.lastStudyDate === undefined) appSettings.lastStudyDate = null;
+
+function renderStreakUI() {
+    const streakEl = document.getElementById('streak-count');
+    if (!streakEl) return;
+    
+    // Thuật toán kiểm tra đứt chuỗi ngay khi mở App
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    let displayStreak = appSettings.streak || 0;
+    
+    // Nếu hôm nay chưa học, và hôm qua cũng không học -> Chuỗi đã đứt!
+    if (appSettings.lastStudyDate !== today && appSettings.lastStudyDate !== yesterdayStr && appSettings.lastStudyDate !== null) {
+        displayStreak = 0; 
+        appSettings.streak = 0; // Đặt lại trong data
+        localStorage.setItem('app_settings', JSON.stringify(appSettings));
+    }
+    
+    streakEl.innerText = displayStreak;
+}
+
+function checkAndUpdateStreak() {
+    const today = new Date().toISOString().split('T')[0];
+    let streakMsg = "";
+
+    // Chỉ tính 1 lần mỗi ngày
+    if (appSettings.lastStudyDate !== today) {
+        if (!appSettings.lastStudyDate || appSettings.streak === 0) {
+            appSettings.streak = 1;
+            streakMsg = "🔥 Khởi đầu tuyệt vời! Bạn đã có chuỗi 1 ngày.";
+        } else {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            if (appSettings.lastStudyDate === yesterdayStr) {
+                appSettings.streak += 1;
+                streakMsg = `🔥 Cháy quá! Chuỗi ${appSettings.streak} ngày liên tiếp!`;
+            } else {
+                appSettings.streak = 1; // Trường hợp dự phòng nếu hàm renderStreakUI chưa kịp chạy
+                streakMsg = "🔥 Bắt đầu lại chuỗi mới nhé. Đừng bỏ cuộc!";
+            }
+        }
+        
+        appSettings.lastStudyDate = today;
+        localStorage.setItem('app_settings', JSON.stringify(appSettings));
+        
+        // Cập nhật lên UI & Hiện thông báo
+        renderStreakUI();
+        if (streakMsg && typeof showToast === "function") showToast(streakMsg, 'success');
+    }
+}

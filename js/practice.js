@@ -282,4 +282,6 @@ function finishQuiz() {
     } else {
         localStorage.setItem('my_vocab', JSON.stringify(vocabList));
     }
+
+    checkAndUpdateStreak();
 }

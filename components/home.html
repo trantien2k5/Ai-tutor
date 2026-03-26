@@ -4,8 +4,15 @@
             <p id="home-greeting-sub" class="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-[0.2em] mb-1">Chào ngày mới</p>
             <h2 id="home-greeting" class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Sẵn sàng học chưa? 🚀</h2>
         </div>
-        <div class="hidden sm:block animate-in slide-in-from-right-4 fade-in duration-500">
-             <span class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-2xl text-xs font-black shadow-sm border border-blue-100 dark:border-blue-800/50">🔥 Giữ vững phong độ!</span>
+        
+        <div class="animate-in slide-in-from-right-4 fade-in duration-500">
+             <div id="streak-container" class="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 px-4 py-2 rounded-2xl border border-orange-200 dark:border-orange-800/50 flex items-center gap-2 shadow-sm cursor-help hover:scale-105 transition-transform" title="Chuỗi ngày học liên tiếp">
+                 <span class="text-2xl animate-pulse">🔥</span>
+                 <div class="flex flex-col">
+                     <span id="streak-count" class="text-xl font-black text-orange-600 dark:text-orange-400 leading-none">0</span>
+                     <span class="text-[9px] font-black text-orange-500/80 dark:text-orange-400/80 uppercase tracking-widest mt-0.5">Ngày</span>
+                 </div>
+             </div>
         </div>
     </div>
 

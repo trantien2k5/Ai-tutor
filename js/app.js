@@ -3,6 +3,7 @@ function refreshAllUI() {
     updateStats();
     renderVocabList();
     updateQuizTopics();
+    if (typeof renderStreakUI === "function") renderStreakUI();
 }
 
 window.onload = async () => {
