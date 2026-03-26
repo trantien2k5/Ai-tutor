@@ -1,94 +1,180 @@
 <section id="tab-settings" class="tab-content hidden animate-in fade-in slide-in-from-bottom-4 pb-10">
     <div class="mb-8">
         <h2 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Cài đặt ⚙️</h2>
-        <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Tùy chỉnh trải nghiệm học tập</p>
+        <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Tùy chỉnh sâu trải nghiệm của bạn</p>
     </div>
 
     <div class="space-y-6">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm">
-            <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Trải nghiệm người dùng
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-5">
+            <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Giao diện & Hiển thị
             </h3>
 
-            <div class="space-y-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Chế độ tối</span>
-                        <span class="text-[10px] text-slate-400 font-medium">Giảm mỏi mắt khi học ban đêm</span>
-                    </div>
-                    <button onclick="toggleDarkMode()" aria-label="Toggle Dark Mode"
-                        class="w-14 h-8 bg-slate-200 dark:bg-blue-600 rounded-full relative transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
-                        <div id="dark-mode-toggle-thumb" class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md flex items-center justify-center">
-                            <span class="text-[10px] dark:hidden">☀️</span>
-                            <span class="text-[10px] hidden dark:block">🌙</span>
-                        </div>
-                    </button>
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Chế độ tối (Dark Mode)</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Bảo vệ mắt khi học ban đêm</span>
                 </div>
-
-                <div class="h-px bg-slate-100 dark:bg-slate-700/50"></div>
-
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Tự động phát âm</span>
-                        <span class="text-[10px] text-slate-400 font-medium">Đọc từ vựng khi lật thẻ flashcard</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="setting-auto-speak" onchange="saveSettings()" class="sr-only peer">
-                        <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm">
-            <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Cấu hình hệ thống
-            </h3>
-            
-            <div class="space-y-5">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1">Giọng đọc (TTS Voice)</label>
-                    <select id="setting-voice" onchange="saveSettings()"
-                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:border-blue-500 transition-colors cursor-pointer"></select>
-                </div>
-                
-                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-                    <div>
-                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Mục tiêu từ vựng</span>
-                        <span class="text-[10px] text-slate-400">Số từ cần học mỗi ngày</span>
-                    </div>
-                    <input type="number" id="setting-goal" onchange="saveSettings()" min="1" max="100"
-                        class="w-20 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-center font-black text-blue-600 outline-none focus:border-blue-500 transition-colors">
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm">
-            <h3 class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Quản lý dữ liệu
-            </h3>
-            
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="exportData()"
-                    class="p-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl font-black text-[10px] uppercase border border-slate-200 dark:border-slate-700 transition-colors flex flex-col items-center gap-2">
-                    <span class="text-xl">📤</span> Xuất dữ liệu
+                <button onclick="toggleDarkMode()" id="dark-mode-btn" class="w-12 h-6 bg-slate-200 dark:bg-blue-600 rounded-full relative transition-colors shadow-inner outline-none">
+                    <div id="dark-mode-toggle-thumb" class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"></div>
                 </button>
-                <label
-                    class="p-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl font-black text-[10px] uppercase border border-slate-200 dark:border-slate-700 transition-colors flex flex-col items-center gap-2 cursor-pointer">
-                    <span class="text-xl">📥</span> Nhập dữ liệu
-                    <input type="file" class="hidden" accept=".json" onchange="importData(event)">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Giảm hoạt ảnh (Tiết kiệm pin)</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Tắt hiệu ứng 3D và thẻ nảy</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="setting-reduce-motion" onchange="saveSettings()" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                 </label>
             </div>
+
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Cỡ chữ thẻ học</span>
+                <select id="setting-font-size" onchange="saveSettings()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-xs font-bold p-2 rounded-lg outline-none cursor-pointer dark:text-white">
+                    <option value="sm">Nhỏ gọn</option>
+                    <option value="md" selected>Mặc định</option>
+                    <option value="lg">To rõ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-5">
+            <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Âm thanh (Audio)
+            </h3>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Tự động đọc từ (Auto-speak)</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="setting-auto-speak" onchange="saveSettings()" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Âm thanh hiệu ứng (SFX)</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Tiếng đúng/sai khi làm bài</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="setting-sfx" onchange="saveSettings()" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <select id="setting-voice" onchange="saveSettings()" class="w-full p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:border-emerald-500"></select>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex justify-between items-center pl-1">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tốc độ đọc</span>
+                    <span id="tts-rate-label" class="text-[10px] font-black text-emerald-500">1.0x</span>
+                </div>
+                <input type="range" id="setting-tts-rate" min="0.5" max="2" step="0.1" value="1" onchange="saveSettings()" oninput="updateRateLabel(this.value)" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-5">
+            <h3 class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Thẻ ghi nhớ (Flashcard)
+            </h3>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Hiện Phiên Âm</span>
+                    <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="setting-show-ipa" onchange="saveSettings()" class="sr-only peer"><div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div></label>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Hiện Ví Dụ</span>
+                    <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="setting-show-example" onchange="saveSettings()" class="sr-only peer"><div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div></label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tự động lật thẻ</span>
+                <select id="setting-auto-flip" onchange="saveSettings()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-xs font-bold p-2 rounded-lg outline-none cursor-pointer dark:text-white">
+                    <option value="off">Tắt</option>
+                    <option value="3">Sau 3 giây</option>
+                    <option value="5">Sau 5 giây</option>
+                </select>
+            </div>
             
-            <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                <button onclick="resetQuizStats()"
-                    class="w-full p-4 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 font-black rounded-2xl text-[11px] uppercase tracking-widest transition-colors flex justify-center items-center gap-2">
-                    <span>Xóa lịch sử thi</span>
-                </button>
-                <button onclick="clearAllData()"
-                    class="w-full p-4 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-black rounded-2xl text-[11px] uppercase tracking-widest transition-colors flex justify-center items-center gap-2">
-                    <span>⚠️ Xóa sạch thư viện</span>
-                </button>
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Luôn xáo trộn thẻ (Shuffle)</span>
+                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="setting-shuffle" onchange="saveSettings()" class="sr-only peer"><div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div></label>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-5">
+            <h3 class="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Trắc nghiệm & AI
+            </h3>
+
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Độ trễ chuyển câu (Thi)</span>
+                <select id="setting-auto-next" onchange="saveSettings()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-xs font-bold p-2 rounded-lg outline-none cursor-pointer dark:text-white">
+                    <option value="500">Nhanh (0.5s)</option>
+                    <option value="1000">Vừa (1.0s)</option>
+                    <option value="2000">Chậm (2.0s)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">AI Level Mặc định</span>
+                    <select id="setting-ai-level" onchange="saveSettings()" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs font-bold p-3 rounded-xl outline-none cursor-pointer dark:text-white">
+                        <option value="A1-A2">A1-A2</option>
+                        <option value="B1-B2">B1-B2</option>
+                        <option value="C1-C2">C1-C2</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">AI Đếm Mặc định</span>
+                    <select id="setting-ai-count" onchange="saveSettings()" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 text-xs font-bold p-3 rounded-xl outline-none cursor-pointer dark:text-white">
+                        <option value="5">5 từ</option>
+                        <option value="10">10 từ</option>
+                        <option value="20">20 từ</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
+            
+            <div class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/50">
+                <div>
+                    <span class="text-sm font-bold text-blue-700 dark:text-blue-300 block">Mục tiêu hằng ngày</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="setting-goal" onchange="saveSettings()" min="1" max="100" class="w-16 p-2 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg text-center font-black text-blue-600 outline-none">
+                    <span class="text-[10px] font-bold text-blue-500 uppercase">Từ</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/50">
+                <div>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 block">Nhắc nhở học tập</span>
+                    <span class="text-[10px] text-slate-400">Gửi thông báo Push hằng ngày</span>
+                </div>
+                <input type="time" id="setting-reminder-time" onchange="toggleReminder()" class="bg-white dark:bg-slate-800 text-xs font-bold p-2 rounded-lg border border-slate-200 dark:border-slate-600 outline-none dark:text-white cursor-pointer">
+            </div>
+
+            <div class="h-px bg-slate-100 dark:bg-slate-700/50"></div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="exportData()" class="p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 rounded-xl font-black text-[10px] uppercase border border-slate-200 dark:border-slate-700 transition-all flex justify-center gap-2 shadow-sm"><span class="text-sm">📤</span> Backup</button>
+                <label class="p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 rounded-xl font-black text-[10px] uppercase border border-slate-200 dark:border-slate-700 transition-all flex justify-center gap-2 shadow-sm cursor-pointer"><span class="text-sm">📥</span> Restore<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+            </div>
+            
+            <div class="p-4 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10 space-y-3">
+                <button onclick="resetQuizStats()" class="w-full p-3 bg-white dark:bg-slate-800 text-orange-600 font-bold rounded-lg text-[11px] uppercase border border-orange-200 dark:border-orange-900/50">Xóa lịch sử thi</button>
+                <button onclick="clearAllData()" class="w-full p-3 bg-red-500 text-white font-black rounded-lg text-[11px] uppercase shadow-md">Xóa sạch thư viện</button>
             </div>
         </div>
     </div>

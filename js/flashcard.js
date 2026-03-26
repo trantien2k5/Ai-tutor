@@ -1,16 +1,19 @@
 /* =========================================
-   FLASHCARD MODULE & SRS INTEGRATION
+   FLASHCARD MODULE & SETTINGS INTEGRATION
    ========================================= */
+let autoFlipTimer = null; // Biến giữ đồng hồ tự lật thẻ
 
 function startFlashcards(topic) {
     let words = vocabList.filter(v => (v.topic || 'Chung') === topic);
     if (words.length === 0) return showToast("📂 Chủ đề này chưa có từ!", 'error');
 
-    // NÂNG CẤP SRS: Sắp xếp các từ cần ôn tập khẩn cấp lên đầu!
-    if (typeof calculateSRSPriority === "function") {
-        words.sort((a, b) => calculateSRSPriority(b) - calculateSRSPriority(a));
-    } else {
+    // 1. TÍNH NĂNG: LUÔN XÁO TRỘN THẺ (SHUFFLE)
+    if (appSettings.shuffleFlashcards) {
         words.sort(() => 0.5 - Math.random());
+    } 
+    // Nếu không bật trộn cứng, ưu tiên dùng thuật toán SRS
+    else if (typeof calculateSRSPriority === "function") {
+        words.sort((a, b) => calculateSRSPriority(b) - calculateSRSPriority(a));
     }
 
     currentSessionWords = words;
@@ -26,6 +29,7 @@ function startFlashcards(topic) {
 }
 
 function closeFlashcards() {
+    clearTimeout(autoFlipTimer); // Xóa đồng hồ tự lật nếu đang chạy
     const flashView = document.getElementById('flashcard-view');
     if (flashView) {
         flashView.classList.add('hidden');
@@ -35,32 +39,61 @@ function closeFlashcards() {
 }
 
 function showCard() {
+    clearTimeout(autoFlipTimer); // Reset bộ đếm tự lật mỗi khi sang thẻ mới
     const card = currentSessionWords[currentCardIndex];
     if (!card) return;
 
     const inner = document.getElementById('card-inner');
     
-    // Ép thẻ úp lại mặt trước không bị giật
+    // 2. TÍNH NĂNG: GIẢM HOẠT ẢNH (REDUCE MOTION)
+    if (appSettings.reduceMotion) {
+        inner.style.transition = 'none'; // Tắt hiệu ứng 3D lật mượt
+    } else {
+        inner.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
+
+    // Ép thẻ về mặt trước
     if (inner && inner.classList.contains('rotate-y-180')) {
+        let oldTransition = inner.style.transition;
         inner.style.transition = 'none'; 
         inner.classList.remove('rotate-y-180');
         void inner.offsetWidth; 
-        inner.style.transition = ''; 
+        inner.style.transition = oldTransition; 
     }
 
-    // NÂNG CẤP SRS: Đảm bảo hiển thị Nút "Xem nghĩa" (Ẩn nút Đánh giá)
+    // Reset UI Bảng điều khiển
     const ctrlFront = document.getElementById('flashcard-controls-front');
     const ctrlBack = document.getElementById('flashcard-controls-back');
     if (ctrlFront && ctrlBack) {
-        ctrlBack.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
-        ctrlBack.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        ctrlBack.classList.replace('opacity-100', 'opacity-0');
+        ctrlBack.classList.replace('pointer-events-auto', 'pointer-events-none');
+        ctrlBack.classList.replace('scale-100', 'scale-95');
         
-        ctrlFront.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-        ctrlFront.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        ctrlFront.classList.replace('opacity-0', 'opacity-100');
+        ctrlFront.classList.replace('pointer-events-none', 'pointer-events-auto');
+        ctrlFront.classList.replace('scale-95', 'scale-100');
     }
 
     const setHtml = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
 
+    // 3. TÍNH NĂNG: CỠ CHỮ & ẨN HIỆN IPA/VÍ DỤ
+    const wordEl = document.getElementById('card-front-word');
+    const ipaEl = document.getElementById('card-front-ipa');
+    const ipaBackEl = document.getElementById('card-back-type-ipa');
+    const exampleBox = document.getElementById('card-back-example').parentElement;
+    
+    if (wordEl) {
+        wordEl.className = `font-black text-slate-800 dark:text-white tracking-tight break-words w-full leading-tight ${appSettings.fontSize === 'lg' ? 'text-5xl sm:text-6xl' : (appSettings.fontSize === 'sm' ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl')}`;
+    }
+
+    // Ẩn/Hiện Phiên âm
+    if (ipaEl) ipaEl.style.display = appSettings.showIPA ? 'block' : 'none';
+    if (ipaBackEl) ipaBackEl.style.display = appSettings.showIPA ? 'block' : 'none';
+    
+    // Ẩn/Hiện Ví dụ
+    if (exampleBox) exampleBox.style.display = appSettings.showExample ? 'block' : 'none';
+
+    // Đổ dữ liệu
     setHtml('card-front-word', card.word);
     setHtml('card-front-ipa', card.ipa || '/.../');
     setHtml('card-front-type', card.type || 'n');
@@ -87,31 +120,46 @@ function showCard() {
     if(progBar) progBar.style.width = `${(current / total) * 100}%`;
 
     if (appSettings.autoSpeak) speak(card.word);
+
+    // 4. TÍNH NĂNG: TỰ ĐỘNG LẬT THẺ
+    if (appSettings.autoFlip !== 'off') {
+        const delay = parseInt(appSettings.autoFlip) * 1000;
+        autoFlipTimer = setTimeout(() => {
+            const innerCheck = document.getElementById('card-inner');
+            if (innerCheck && !innerCheck.classList.contains('rotate-y-180')) {
+                flipCard(); // Tự gọi hàm lật mặt
+            }
+        }, delay);
+    }
 }
 
 function flipCard() {
+    clearTimeout(autoFlipTimer); // Hủy tự lật nếu user đã tự bấm lật
     const inner = document.getElementById('card-inner');
     if(!inner) return;
     
     const isFlippingToBack = !inner.classList.contains('rotate-y-180');
     inner.classList.toggle('rotate-y-180');
     
-    // NÂNG CẤP SRS: Chuyển đổi UI Bảng điều khiển
     const ctrlFront = document.getElementById('flashcard-controls-front');
     const ctrlBack = document.getElementById('flashcard-controls-back');
 
     if (isFlippingToBack) {
-        ctrlFront.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-        ctrlFront.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+        ctrlFront.classList.replace('opacity-100', 'opacity-0');
+        ctrlFront.classList.replace('pointer-events-auto', 'pointer-events-none');
+        ctrlFront.classList.replace('scale-100', 'scale-95');
         
-        ctrlBack.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-        ctrlBack.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        ctrlBack.classList.replace('opacity-0', 'opacity-100');
+        ctrlBack.classList.replace('pointer-events-none', 'pointer-events-auto');
+        ctrlBack.classList.replace('scale-95', 'scale-100');
     } else {
-        ctrlBack.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
-        ctrlBack.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        ctrlBack.classList.replace('opacity-100', 'opacity-0');
+        ctrlBack.classList.replace('pointer-events-auto', 'pointer-events-none');
+        ctrlBack.classList.replace('scale-100', 'scale-95');
         
-        ctrlFront.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-        ctrlFront.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        ctrlFront.classList.replace('opacity-0', 'opacity-100');
+        ctrlFront.classList.replace('pointer-events-none', 'pointer-events-auto');
+        ctrlFront.classList.replace('scale-95', 'scale-100');
     }
 
     const card = currentSessionWords[currentCardIndex];
@@ -120,14 +168,12 @@ function flipCard() {
     }
 }
 
-// NÂNG CẤP SRS: Ghi nhận điểm thông thạo
 function rateFlashcard(score) {
     const card = currentSessionWords[currentCardIndex];
     if (card) {
         if (card.masteryLevel === undefined) card.masteryLevel = 0;
-        
         card.masteryLevel += score;
-        if (card.masteryLevel < -2) card.masteryLevel = -2; // Khóa đáy
+        if (card.masteryLevel < -2) card.masteryLevel = -2;
         card.lastReviewed = new Date().toISOString();
 
         if (typeof saveVocabToStorage === "function") {

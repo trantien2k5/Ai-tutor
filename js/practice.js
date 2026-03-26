@@ -135,11 +135,17 @@ function handleQuizAnswer(selected, btn) {
     if (isCorrect) {
         quizState.score++;
         wordObj.masteryLevel += 1; 
+        
+        // Phát âm thanh đúng
+        if(typeof playSound === 'function') playSound('success');
 
         btn.classList.replace('border-slate-100', 'border-emerald-500');
         btn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
     } else {
         wordObj.masteryLevel = Math.max(-2, wordObj.masteryLevel - 1); 
+        
+        // Phát âm thanh sai
+        if(typeof playSound === 'function') playSound('error');
         
         quizState.wrongAnswers.push({
             word: wordObj.word,
@@ -164,7 +170,9 @@ function handleQuizAnswer(selected, btn) {
             const explain = document.getElementById('quiz-explanation');
             
             document.getElementById('explain-mean').innerText = wordObj.mean;
-            document.getElementById('explain-example').innerText = wordObj.example ? `"${wordObj.example}"` : "Không có ví dụ.";
+            // Áp dụng Cài đặt: Ẩn/hiện ví dụ
+            document.getElementById('explain-example').innerText = (!appSettings.showExample) ? "Đã tắt hiển thị ví dụ trong cài đặt." : (wordObj.example ? `"${wordObj.example}"` : "Không có ví dụ.");
+            
             document.getElementById('explain-synonyms').innerText = (wordObj.synonyms && wordObj.synonyms !== 'None') ? wordObj.synonyms : 'N/A';
             document.getElementById('explain-antonyms').innerText = (wordObj.antonyms && wordObj.antonyms !== 'None') ? wordObj.antonyms : 'N/A';
             
@@ -181,7 +189,9 @@ function handleQuizAnswer(selected, btn) {
         }, 600);
     } else {
         quizState.currentIdx++;
-        setTimeout(renderQuizQuestion, 500);
+        // ÁP DỤNG CÀI ĐẶT: Thời gian chuyển câu trắc nghiệm
+        const delayTime = appSettings.autoNextDelay || 1000;
+        setTimeout(renderQuizQuestion, delayTime);
     }
 }
 
