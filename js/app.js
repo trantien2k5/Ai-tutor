@@ -16,7 +16,9 @@ window.onload = async () => {
         loadComponent('tab-library', 'library.html'),
         loadComponent('tab-ai-gen', 'ai.html'),
         loadComponent('tab-practice', 'practice.html'),
-        loadComponent('tab-settings', 'settings.html')
+        loadComponent('tab-settings', 'settings.html'),
+        // Thêm dòng nạp component flashcard vào wrapper
+        loadComponent('flashcard-wrapper', 'flashcard.html') 
     ]);
 
     // 2. Khởi chạy các cấu hình người dùng
