@@ -1,108 +1,126 @@
+/* =========================================
+   HOME (DASHBOARD) LOGIC (LIGHT & CLEAN UI)
+   ========================================= */
+
 function updateStats() {
     const container = document.getElementById('topic-list-container');
     if (!container) return;
 
-    // Lấy dữ liệu thống kê
     const topics = [...new Set(vocabList.map(v => v.topic || 'Chung'))];
     const totalWords = vocabList.length;
     const dailyGoal = appSettings.dailyGoal || 10;
+    
+    const masteredWords = vocabList.filter(v => v.masteryLevel && v.masteryLevel > 0).length;
 
-    // 1. Cập nhật Thống kê Nhanh (Quick Stats)
     const statWordsEl = document.getElementById('stat-total-words');
     const statTopicsEl = document.getElementById('stat-total-topics');
+    const statMasteredEl = document.getElementById('stat-mastered-words');
+    
     if (statWordsEl) statWordsEl.innerText = totalWords;
     if (statTopicsEl) statTopicsEl.innerText = topics.length;
+    if (statMasteredEl) statMasteredEl.innerText = masteredWords;
 
-    // 2. Cập nhật Banner Mục tiêu
     const homeCount = document.getElementById('home-count');
     const goalText = document.getElementById('home-goal-text');
     const progressBar = document.getElementById('goal-progress-bar');
     
     if (homeCount) homeCount.innerText = totalWords;
-    if (goalText) goalText.innerText = `/ ${dailyGoal} từ`;
+    if (goalText) goalText.innerText = `/ ${dailyGoal} từ mục tiêu`;
+    
     if (progressBar) {
         const percent = Math.min((totalWords / dailyGoal) * 100, 100);
-        // Delay nhẹ để tạo hiệu ứng thanh chạy mượt mà khi load trang
-        setTimeout(() => { progressBar.style.width = percent + '%'; }, 300);
+        setTimeout(() => { progressBar.style.width = percent + '%'; }, 100);
     }
 
-    // 3. Hiển thị lời chào động theo thời gian
     const hour = new Date().getHours();
     const greetingEl = document.getElementById('home-greeting-sub');
     const greetingTitle = document.getElementById('home-greeting');
+    
     if (greetingEl && greetingTitle) {
-        if (hour < 12) {
+        if (hour >= 5 && hour < 12) {
             greetingEl.innerText = "Chào buổi sáng ☀️";
             greetingTitle.innerText = "Bắt đầu ngày mới nào!";
-        } else if (hour < 18) {
+        } else if (hour >= 12 && hour < 18) {
             greetingEl.innerText = "Chào buổi chiều 🌤️";
             greetingTitle.innerText = "Nạp thêm từ vựng nhé!";
-        } else {
+        } else if (hour >= 18 && hour < 23) {
             greetingEl.innerText = "Chào buổi tối 🌙";
             greetingTitle.innerText = "Ôn tập trước khi ngủ!";
+        } else {
+            greetingEl.innerText = "Cú đêm chăm chỉ 🦉";
+            greetingTitle.innerText = "Học xong nhớ ngủ sớm!";
         }
     }
 
-    // 4. Random Mẹo học tập
     const tips = [
-        "Học theo chủ đề giúp não bộ liên kết thông tin tốt hơn 40% so với học từ rời rạc.",
-        "Ôn tập lại từ vựng ngay trước khi ngủ sẽ giúp trí nhớ ngắn hạn chuyển thành dài hạn.",
-        "Hãy thử đọc to từ vựng thay vì chỉ nhìn bằng mắt, phản xạ nghe nói của bạn sẽ tăng đáng kể.",
-        "Sử dụng AI Lab để tạo ngay 10 từ vựng cho chuyên ngành bạn đang làm việc nhé!"
+        "Học theo chủ đề giúp não bộ liên kết thông tin tốt hơn 40%.",
+        "Ôn tập lại từ vựng ngay trước khi ngủ sẽ giúp chuyển vào trí nhớ dài hạn.",
+        "Sử dụng AI Lab để tạo ngay 10 từ vựng cho chuyên ngành của bạn!",
+        "Dùng chức năng Flashcard và đánh giá 'Quên/Đã thuộc' thật thà nhé.",
+        "Đừng quên bật 'Tự động phát âm' để luyện phản xạ nghe tiếng Anh."
     ];
     const tipEl = document.getElementById('home-daily-tip');
     if (tipEl && !tipEl.dataset.loaded) {
         tipEl.innerText = tips[Math.floor(Math.random() * tips.length)];
-        tipEl.dataset.loaded = "true"; // Tránh đổi text liên tục mỗi khi re-render
+        tipEl.dataset.loaded = "true"; 
     }
 
-    // 5. Render Danh sách Chủ đề (Giao diện thẻ VIP)
+    // RENDER THẺ CHỦ ĐỀ SÁNG SỦA, TINH TẾ
     if (topics.length === 0) {
-        container.innerHTML = `<div class="col-span-full py-10 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 text-center"><p class="text-4xl mb-3 opacity-50">📂</p><p class="text-slate-500 dark:text-slate-400 font-bold text-sm">Chưa có chủ đề nào.</p><button onclick="switchTab('ai-gen')" class="mt-4 text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-600">Thêm ngay →</button></div>`;
+        container.innerHTML = `
+            <div class="col-span-full py-12 bg-white dark:bg-slate-800 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-700 text-center shadow-sm">
+                <p class="text-5xl mb-4 opacity-40 drop-shadow-sm">📂</p>
+                <p class="text-slate-500 dark:text-slate-400 font-bold text-sm mb-5">Thư viện của bạn đang trống.</p>
+                <button onclick="switchTab('ai-gen')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-colors border border-blue-100 dark:border-blue-800/50 shadow-sm">Khám phá AI Lab →</button>
+            </div>`;
         return;
     }
 
-    container.innerHTML = topics.map((topic, index) => {
+    const topTopics = topics.slice(0, 6);
+
+    container.innerHTML = topTopics.map((topic, index) => {
         const count = vocabList.filter(v => (v.topic || 'Chung') === topic).length;
-        // Chuyển màu icon folder xen kẽ cho sinh động
-        const colors = ['text-blue-500', 'text-emerald-500', 'text-amber-500', 'text-purple-500'];
-        const iconColor = colors[index % colors.length];
+        
+        // Tone màu Pastel dịu mắt, sang trọng
+        const colorPresets = [
+            { bg: 'bg-blue-50 text-blue-500 border-blue-100', glow: 'from-blue-50 to-white' },
+            { bg: 'bg-emerald-50 text-emerald-500 border-emerald-100', glow: 'from-emerald-50 to-white' },
+            { bg: 'bg-indigo-50 text-indigo-500 border-indigo-100', glow: 'from-indigo-50 to-white' },
+            { bg: 'bg-purple-50 text-purple-500 border-purple-100', glow: 'from-purple-50 to-white' },
+            { bg: 'bg-rose-50 text-rose-500 border-rose-100', glow: 'from-rose-50 to-white' }
+        ];
+        const theme = colorPresets[index % colorPresets.length];
 
         return `
-            <div onclick="startFlashcards('${topic}')" class="group relative overflow-hidden bg-white dark:bg-slate-800 p-5 lg:p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-bl-[4rem] -z-10 transition-transform duration-500 group-hover:scale-125 opacity-50"></div>
+            <div onclick="startFlashcards('${topic}')" class="group relative overflow-hidden bg-white dark:bg-slate-800 p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 hover:border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[140px]">
                 
-                <div class="flex justify-between items-start mb-6">
-                    <div class="w-12 h-12 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-2xl ${iconColor} group-hover:rotate-12 transition-transform duration-300">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${theme.glow} dark:from-slate-700 dark:to-slate-800 rounded-full blur-2xl -z-10 transition-transform duration-500 group-hover:scale-150 opacity-60 -mr-10 -mt-10"></div>
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-10 h-10 ${theme.bg} dark:bg-slate-900/50 border dark:border-slate-700 rounded-[0.8rem] flex items-center justify-center text-xl group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                         📁
                     </div>
-                    <span class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest">${count} từ</span>
+                    <span class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:text-slate-600 transition-colors">${count} từ</span>
                 </div>
                 
-                <h3 class="font-black text-slate-800 dark:text-white text-base uppercase tracking-tight mb-2 truncate" title="${topic}">${topic}</h3>
-                
-                <div class="flex items-center justify-between border-t border-slate-50 dark:border-slate-700/50 pt-4">
-                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">Học ngay</span>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white text-slate-400 transition-colors shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+                <div>
+                    <h3 class="font-black text-slate-800 dark:text-white text-sm md:text-base uppercase tracking-tight truncate pr-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title="${topic}">${topic}</h3>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:opacity-0 transition-opacity duration-300">Nhấn để học</span>
+                        <span class="absolute bottom-5 left-5 text-[10px] font-black text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform -translate-x-2 group-hover:translate-x-0 duration-300">Bắt đầu →</span>
                     </div>
                 </div>
             </div>`;
     }).join('');
 }
 
-
-// --- HỆ THỐNG STREAK (CHUỖI NGÀY HỌC) --- //
-
-// Đảm bảo appSettings có đủ biến khi khởi tạo
-if (appSettings.streak === undefined) appSettings.streak = 0;
-if (appSettings.lastStudyDate === undefined) appSettings.lastStudyDate = null;
-
+// --- HỆ THỐNG STREAK --- //
 function renderStreakUI() {
     const streakEl = document.getElementById('streak-count');
     if (!streakEl) return;
     
-    // Thuật toán kiểm tra đứt chuỗi ngay khi mở App
+    if (appSettings.streak === undefined) appSettings.streak = 0;
+    
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -110,10 +128,9 @@ function renderStreakUI() {
     
     let displayStreak = appSettings.streak || 0;
     
-    // Nếu hôm nay chưa học, và hôm qua cũng không học -> Chuỗi đã đứt!
     if (appSettings.lastStudyDate !== today && appSettings.lastStudyDate !== yesterdayStr && appSettings.lastStudyDate !== null) {
         displayStreak = 0; 
-        appSettings.streak = 0; // Đặt lại trong data
+        appSettings.streak = 0; 
         localStorage.setItem('app_settings', JSON.stringify(appSettings));
     }
     
@@ -121,10 +138,12 @@ function renderStreakUI() {
 }
 
 function checkAndUpdateStreak() {
+    if (appSettings.streak === undefined) appSettings.streak = 0;
+    if (appSettings.lastStudyDate === undefined) appSettings.lastStudyDate = null;
+
     const today = new Date().toISOString().split('T')[0];
     let streakMsg = "";
 
-    // Chỉ tính 1 lần mỗi ngày
     if (appSettings.lastStudyDate !== today) {
         if (!appSettings.lastStudyDate || appSettings.streak === 0) {
             appSettings.streak = 1;
@@ -138,7 +157,7 @@ function checkAndUpdateStreak() {
                 appSettings.streak += 1;
                 streakMsg = `🔥 Cháy quá! Chuỗi ${appSettings.streak} ngày liên tiếp!`;
             } else {
-                appSettings.streak = 1; // Trường hợp dự phòng nếu hàm renderStreakUI chưa kịp chạy
+                appSettings.streak = 1;
                 streakMsg = "🔥 Bắt đầu lại chuỗi mới nhé. Đừng bỏ cuộc!";
             }
         }
@@ -146,8 +165,8 @@ function checkAndUpdateStreak() {
         appSettings.lastStudyDate = today;
         localStorage.setItem('app_settings', JSON.stringify(appSettings));
         
-        // Cập nhật lên UI & Hiện thông báo
         renderStreakUI();
         if (streakMsg && typeof showToast === "function") showToast(streakMsg, 'success');
+        if (typeof playSound === 'function') playSound('success');
     }
 }
