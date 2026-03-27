@@ -335,12 +335,26 @@ const LibraryModule = (function() {
         }
     });
 
-    // Chỉ xuất khẩu các hàm cần thiết để main.js gọi lúc khởi tạo (tránh biến rác toàn cục)
+    const actions = {
+        'switch-lib-view': (payload) => switchLibView(payload),
+        'switch-lib-view-topic': (payload) => switchLibView('notebook', payload),
+        'set-lib-view-mode': (payload) => setLibraryViewMode(payload),
+        'delete-topic': (payload) => deleteTopic(payload),
+        'delete-vocab': (payload) => deleteVocab(parseInt(payload, 10)),
+        'add-more-words': (payload) => { if (window.addMoreWordsToTopic) window.addMoreWordsToTopic(payload); },
+        'start-flashcards': (payload) => {
+            const flashBtn = document.querySelector(`[data-action="start-flashcards"][data-payload="${payload}"]`);
+            if (flashBtn) {
+                import('./flashcard.js').then(m => m.FlashcardModule.actions['start-flashcards'](payload));
+            }
+        }
+    };
+
     return {
         renderLibrary,
-        renderVocabList
+        renderVocabList,
+        actions
     };
 })();
 
-// Đã loại bỏ hoàn toàn các dòng khai báo window.handleSearchInput = ...
 export { LibraryModule };

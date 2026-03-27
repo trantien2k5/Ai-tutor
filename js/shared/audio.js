@@ -31,12 +31,21 @@ export const AudioAPI = {
     // Tạo âm thanh hiệu ứng đúng/sai (SFX)
     playSound: (type) => {
         const settings = AppState.getSettings();
-        if (!settings.sfxEnabled) return; // Tự động chặn nếu user đã tắt SFX trong cài đặt
+        if (!settings.sfxEnabled) return;
         
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return; 
-            const ctx = new AudioContext();
+            
+            if (!AudioAPI._ctx) {
+                AudioAPI._ctx = new AudioContext();
+            }
+            
+            const ctx = AudioAPI._ctx;
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             
@@ -61,7 +70,7 @@ export const AudioAPI = {
                 osc.stop(ctx.currentTime + 0.2);
             }
         } catch (e) { 
-            console.error("Lỗi phát SFX:", e); 
+            console.warn("AudioContext blocked or failed:", e); 
         }
     }
 };

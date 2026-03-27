@@ -196,7 +196,12 @@ Trả về CHỈ MỘT mảng JSON theo đúng định dạng sau, không kèm t
         }
     });
 
-    return {};
+    const actions = {
+        'copy-prompt': () => copyDynamicPrompt(),
+        'process-ai-vocab': () => processVocab()
+    };
+
+    return { actions };
 })();
 
 export { AIModule };
