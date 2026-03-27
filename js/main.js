@@ -131,3 +131,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.switchTab = switchTab;
     window.appEventBus = appEventBus;
 });
+
+window.addMoreWordsToTopic = function(topicName) {
+    // 1. Tìm ô nhập chủ đề ở tab AI
+    const topicInput = document.getElementById('user-topic');
+    if (topicInput) {
+        // 2. Điền tên chủ đề cũ vào
+        topicInput.value = topicName;
+        // 3. Focus vào để user thấy
+        topicInput.focus();
+    }
+    
+    // 4. Chuyển sang tab AI
+    switchTab('ai-gen');
+    
+    // 5. Thông báo nhẹ
+    if (typeof showToast === 'function') {
+        showToast(`Đã chọn chủ đề: ${topicName}. Hãy copy Prompt để sinh thêm từ!`, 'success');
+    }
+}

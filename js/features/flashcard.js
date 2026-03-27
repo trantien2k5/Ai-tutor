@@ -1,4 +1,3 @@
-// js/features/flashcard.js
 import { AppState } from '../core/state.js';
 import { appEventBus, EVENTS } from '../core/eventBus.js';
 import { showToast } from '../shared/ui-helpers.js';
@@ -120,7 +119,6 @@ const FlashcardModule = (function () {
 
     function flipCard() {
         clearTimeout(autoFlipTimer);
-        const settings = AppState.getSettings();
         const inner = document.getElementById('card-inner');
         if (!inner) return;
 
@@ -149,7 +147,7 @@ const FlashcardModule = (function () {
         }
 
         const card = currentSessionWords[currentCardIndex];
-        if (card && isFlippingToBack && !settings.autoSpeak) {
+        if (card && isFlippingToBack) {
             AudioAPI.speak(card.word);
         }
     }

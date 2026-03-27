@@ -1,45 +1,77 @@
-<section id="tab-library" class="tab-content hidden">
-    <div class="mb-6 sticky top-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-20 pt-2 pb-4" id="library-header-section">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Thư viện 📚</h2>
-                <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Quản lý không gian học tập</p>
-            </div>
+<section id="tab-library" class="tab-content hidden h-full flex flex-col relative pb-24">
+    <div class="px-4 pt-6 md:px-8 md:pt-8 flex justify-between items-end max-w-5xl mx-auto w-full z-10">
+        <div class="pb-1"> <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight leading-none" id="lib-title">Thư viện Chủ đề</h2>
+            <p class="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm mt-2" id="lib-subtitle">Quản lý các bộ từ vựng của bạn</p>
         </div>
-
-        <div class="flex bg-slate-200/50 dark:bg-slate-800/80 p-1 rounded-2xl backdrop-blur-sm border border-slate-200 dark:border-slate-700/50">
-            <button onclick="switchLibView('topics')" id="btn-view-topics"
-                class="flex-1 py-3 rounded-xl text-[11px] font-black uppercase transition-all bg-white dark:bg-slate-700 text-blue-600 shadow-sm tracking-widest">
-                📁 Chủ đề
-            </button>
-            <button onclick="switchLibView('notebook')" id="btn-view-notebook"
-                class="flex-1 py-3 rounded-xl text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase transition-all hover:text-slate-700 dark:hover:text-slate-200 tracking-widest bg-transparent shadow-none">
-                📓 Sổ tay từ vựng
-            </button>
-        </div>
+        
+        <button onclick="switchLibView('notebook')" id="btn-open-notebook" class="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
+            <span class="text-xl group-hover:scale-110 transition-transform">📓</span>
+            <span class="hidden md:block text-[10px] font-black uppercase tracking-widest">Sổ tay</span>
+        </button>
+        
+        <button onclick="switchLibView('topics')" id="btn-back-topics" class="hidden flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
+            <span class="text-lg group-hover:-translate-x-1 transition-transform">←</span>
+            <span class="hidden md:block text-[10px] font-black uppercase tracking-widest">Trở về</span>
+        </button>
     </div>
 
-    <div id="library-topics-view" class="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6 pb-10"></div>
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 max-w-5xl mx-auto w-full">
+        <div id="library-topics-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-    <div id="library-notebook-view" class="hidden space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4">
-        
-        <div class="flex flex-col md:flex-row gap-3">
-            <div class="flex-1 flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-                <div class="w-10 h-10 bg-slate-50 dark:bg-slate-900 rounded-xl flex items-center justify-center text-slate-400 text-lg">🔍</div>
-                <input type="text" id="library-search" oninput="handleSearchInput()" placeholder="Tìm từ vựng, nghĩa, ví dụ..."
-                    class="bg-transparent border-none outline-none text-sm p-1 w-full font-bold text-slate-700 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600">
+        <div id="library-notebook-view" class="hidden space-y-6">
+            <div class="p-4 md:p-5 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-4">
+                
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative min-w-[200px]">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                        <input type="text" id="library-search" oninput="handleSearchInput()" placeholder="Tìm kiếm từ vựng, nghĩa, ví dụ..." class="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 transition-shadow outline-none">
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-2xl shrink-0">
+                        <button onclick="setLibraryViewMode('list')" id="view-btn-list" class="p-2.5 rounded-xl bg-white dark:bg-slate-700 shadow-sm text-blue-500 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                        <button onclick="setLibraryViewMode('grid')" id="view-btn-grid" class="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4">
+                    <div class="relative flex-1 min-w-[140px]">
+                        <select id="library-topic-filter" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                            <option value="all">🌐 Tất cả chủ đề</option>
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                    </div>
+
+                    <div class="relative flex-1 min-w-[140px]">
+                        <select id="library-filter" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                            <option value="all">Tất cả loại từ</option>
+                            <option value="n">Danh từ (n)</option>
+                            <option value="v">Động từ (v)</option>
+                            <option value="adj">Tính từ (adj)</option>
+                            <option value="adv">Trạng từ (adv)</option>
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                    </div>
+
+                    <div class="relative flex-1 min-w-[160px]">
+                        <select id="library-sort" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                            <option value="newest">Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                            <option value="az">Từ A - Z</option>
+                            <option value="za">Từ Z - A</option>
+                            <option value="mastery_asc">Chưa thuộc</option>
+                            <option value="mastery_desc">Đã thuộc</option>
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                    </div>
+                </div>
             </div>
             
-            <select id="library-filter" onchange="renderVocabList(true)"
-                class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 outline-none text-xs font-black p-4 rounded-2xl uppercase text-slate-600 dark:text-slate-300 cursor-pointer shadow-sm focus:border-blue-500 transition-all min-w-[150px]">
-                <option value="all">🌐 Tất cả từ</option>
-                <option value="n">📦 Danh từ (n)</option>
-                <option value="v">⚡ Động từ (v)</option>
-                <option value="adj">✨ Tính từ (adj)</option>
-                <option value="adv">🚀 Trạng từ (adv)</option>
-            </select>
+            <div id="vocab-container" class="flex flex-col gap-4"></div>
+            <div id="infinite-scroll-sentinel" class="h-10 w-full opacity-0 pointer-events-none"></div>
         </div>
-
-        <div id="vocab-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
+    </main>
 </section>

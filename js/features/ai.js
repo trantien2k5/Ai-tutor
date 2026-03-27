@@ -1,39 +1,60 @@
-// js/features/ai.js
 import { AppState } from '../core/state.js';
 import { appEventBus, EVENTS } from '../core/eventBus.js';
 import { showToast } from '../shared/ui-helpers.js';
 
 const AIModule = (function() {
-    
-    // 1. NÂNG CẤP PROMPT: Yêu cầu AI sinh thêm Icon và Tên chuyên nghiệp
     function copyDynamicPrompt() {
-        const topic = document.getElementById('user-topic').value.trim() || 'General vocabulary';
-        const level = document.getElementById('user-level').value;
-        const count = document.getElementById('user-count').value;
+        const settings = AppState.getSettings();
+        const topicInput = document.getElementById('user-topic');
+        const levelInput = document.getElementById('user-level');
+        const countInput = document.getElementById('user-count');
 
-        const prompt = `Act as an expert English teacher. I want to learn about "${topic}" at ${level} level. Generate exactly ${count} vocabulary words.
+        const topic = (topicInput && topicInput.value.trim()) ? topicInput.value.trim() : 'General vocabulary';
+        const level = (levelInput && levelInput.value) ? levelInput.value : (settings.aiLevel || 'B1-B2');
+        const count = (countInput && countInput.value) ? countInput.value : (settings.aiCount || '10');
 
-CRITICAL RULES:
-1. Refine the topic name to be professional, concise, and in Vietnamese (e.g., if I input "code", refine it to "Lập trình & Công nghệ").
+        const vocabList = AppState.getVocab();
+        const cleanTopicName = topic.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '').toLowerCase().trim();
+        
+        const existingWords = vocabList
+            .filter(v => (v.topic || '').toLowerCase().includes(cleanTopicName))
+            .map(v => v.word)
+            .join(', ');
+
+        let progressiveInstruction = "Prioritize high-frequency, essential, and practical English words that are most commonly used in real-life situations related to this topic.";
+        
+        if (existingWords.length > 0) {
+            progressiveInstruction = `CRITICAL: The user ALREADY KNOWS the following words. DO NOT generate them again:\n[${existingWords}]\n\nExpand the vocabulary scope to other important, high-frequency, and practical words related to the topic that are NOT in the list above.`;
+        }
+
+        const prompt = `Act as an expert English teacher and curriculum designer. 
+I want to learn about "${topic}" at ${level} level. Generate exactly ${count} vocabulary words.
+
+${progressiveInstruction}
+
+RULES:
+1. Refine the topic name to be professional, concise, and in Vietnamese.
 2. Provide a single, fitting emoji as the "topicIcon".
-3. Mix word types (n, v, adj, adv).
-4. "mean" and "note" MUST be in Vietnamese.
-5. Output ONLY a valid raw JSON object. NO markdown, NO code blocks.
+3. For EACH word, provide a unique, descriptive emoji as the "wordIcon".
+4. Mix word types (n, v, adj, adv).
+5. "mean" and "note" MUST be in Vietnamese.
+6. Output ONLY a valid raw JSON object. NO markdown, NO code blocks.
 
 Format EXACTLY like this:
 {
   "refinedTopic": "Tên chủ đề tiếng Việt chuyên nghiệp",
-  "topicIcon": "🚀",
+  "topicIcon": "🦁",
   "words": [
     {
-      "word": "English word",
-      "ipa": "/IPA pronunciation/",
-      "type": "n/v/adj/adv",
-      "mean": "Nghĩa tiếng Việt (ngắn gọn)",
-      "synonyms": "1-2 English synonyms",
-      "antonyms": "1-2 English antonyms (or 'None')",
-      "example": "A simple English example sentence",
-      "note": "Một câu tiếng Việt ngắn giúp dễ nhớ từ này"
+      "wordIcon": "🐯",
+      "word": "tiger",
+      "ipa": "/ˈtaɪ.ɡɚ/",
+      "type": "n",
+      "mean": "con hổ",
+      "synonyms": "big cat",
+      "antonyms": "prey",
+      "example": "The tiger is a powerful hunter.",
+      "note": "Hổ là loài mèo lớn nhất."
     }
   ]
 }`;
@@ -45,11 +66,11 @@ Format EXACTLY like this:
         });
     }
 
-    // 2. NÂNG CẤP XỬ LÝ DỮ LIỆU: Đọc định dạng mới và ghép Icon
     function processVocab() {
         const inputArea = document.getElementById('ai-input');
         const topicInput = document.getElementById('user-topic');
         const levelInput = document.getElementById('user-level');
+        const settings = AppState.getSettings();
 
         if (!inputArea || !inputArea.value.trim()) {
             showToast('⚠️ Vui lòng dán kết quả từ AI vào ô!', 'error');
@@ -58,11 +79,8 @@ Format EXACTLY like this:
 
         try {
             let rawData = inputArea.value.trim();
-            
-            // Xóa markdown code block nếu người dùng lỡ copy dư (VD: ```json ... ```)
             rawData = rawData.replace(/^```(json)?|```$/gi, '').trim();
 
-            // Tìm và bóc tách khối JSON hợp lệ (Object hoặc Array)
             let parsedData;
             const match = rawData.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
             if (match) {
@@ -71,22 +89,20 @@ Format EXACTLY like this:
                 parsedData = JSON.parse(rawData);
             }
 
-            const currentLevel = levelInput ? levelInput.value : 'B1-B2';
+            const currentLevel = (levelInput && levelInput.value) ? levelInput.value : (settings.aiLevel || 'B1-B2');
             const currentVocab = AppState.getVocab();
             
             let vocabList = [];
-            let finalTopic = topicInput.value.trim() || 'Chung';
+            let finalTopic = (topicInput && topicInput.value.trim()) ? topicInput.value.trim() : 'Chung';
 
-            // Xử lý linh hoạt cả chuẩn cũ (Array) và chuẩn mới (Object)
-            if (Array.isArray(parsedData)) {
-                vocabList = parsedData; 
-            } else if (parsedData && Array.isArray(parsedData.words)) {
+            if (parsedData && Array.isArray(parsedData.words)) {
                 vocabList = parsedData.words; 
-                
-                // Ghép Emoji và Tên chủ đề AI trả về
                 const icon = parsedData.topicIcon || '📁';
                 const refined = parsedData.refinedTopic || finalTopic;
                 finalTopic = `${icon} ${refined}`.trim();
+            } else if (Array.isArray(parsedData)) {
+                vocabList = parsedData; 
+                finalTopic = `📁 ${finalTopic}`.trim();
             } else {
                 showToast('❌ Kết quả không đúng định dạng (Array/Object).', 'error');
                 return;
@@ -106,6 +122,7 @@ Format EXACTLY like this:
                     return {
                         id: 'vocab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                         word: item.word || 'Unknown',
+                        wordIcon: item.wordIcon || '📝',
                         ipa: item.ipa || '/.../',
                         type: item.type || 'n',
                         mean: item.mean || 'Chưa có nghĩa',
@@ -113,7 +130,7 @@ Format EXACTLY like this:
                         antonyms: item.antonyms || 'N/A',
                         example: item.example || '',
                         note: item.note || '',
-                        topic: finalTopic, // Gán chủ đề cực xịn xò vào đây
+                        topic: finalTopic,
                         level: currentLevel,          
                         createdAt: new Date().toISOString(), 
                         masteryLevel: 0,              
@@ -130,7 +147,7 @@ Format EXACTLY like this:
                 inputArea.value = '';
                 
                 const msg = duplicateCount > 0 
-                    ? `🎉 Nạp ${addedCount} từ mới (Bỏ qua ${duplicateCount} từ trùng)`
+                    ? `🎉 Đã tạo chủ đề: ${finalTopic} (Bỏ qua ${duplicateCount} từ trùng)`
                     : `🎉 Đã tạo chủ đề: ${finalTopic}`;
                 showToast(msg);
                 
@@ -151,4 +168,3 @@ window.copyDynamicPrompt = AIModule.copyDynamicPrompt;
 window.processVocab = AIModule.processVocab;
 
 export { AIModule };
-                          

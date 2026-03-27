@@ -1,71 +1,77 @@
-<section id="tab-ai-gen" class="tab-content hidden animate-in fade-in slide-in-from-bottom-4 pb-10">
-    <div class="mb-6 flex items-center justify-between">
+<section id="tab-ai-gen" class="tab-content hidden h-full flex flex-col relative pb-24">
+    <div class="px-4 pt-6 md:px-8 md:pt-8 flex justify-between items-center max-w-5xl mx-auto w-full z-10">
         <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">AI Lab ✨</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Tạo từ vựng tự động với AI</p>
-        </div>
-        <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-        </a>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm">1</div>
-                <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Cấu hình & Copy Prompt</h3>
-            </div>
-
-            <div class="space-y-4 flex-1">
-                <div class="space-y-1.5">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Chủ đề từ vựng</label>
-                    <div class="relative focus-within:ring-4 focus-within:ring-blue-500/10 rounded-xl transition-all">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🎯</span>
-                        <input type="text" id="user-topic" placeholder="VD: Công nghệ, IELTS, Du lịch..."
-                            class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:border-blue-500 transition-colors placeholder:text-slate-400 text-sm">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Độ khó</label>
-                        <select id="user-level" class="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
-                            <option value="A1-A2">🌱 Cơ bản</option>
-                            <option value="B1-B2" selected>🚀 Trung cấp</option>
-                            <option value="C1-C2">🔥 Cao cấp</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Số lượng</label>
-                        <select id="user-count" class="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
-                            <option value="5">5 từ</option>
-                            <option value="10" selected>10 từ</option>
-                            <option value="20">20 từ</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="copyDynamicPrompt()" class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-black shadow-md hover:shadow-lg transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2 active:scale-[0.98]">
-                📋 Copy Prompt Mẫu
-            </button>
-        </div>
-
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-sm">2</div>
-                <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Nạp kết quả từ AI</h3>
-            </div>
-
-            <div class="flex-1 focus-within:ring-4 focus-within:ring-emerald-500/10 rounded-xl transition-all min-h-[160px]">
-                <textarea id="ai-input" placeholder="Dán đoạn mã JSON AI trả về vào đây (bắt đầu bằng [ và kết thúc bằng ])..."
-                    class="w-full h-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-[11px] text-slate-700 dark:text-slate-300 outline-none focus:border-emerald-500 transition-colors placeholder:text-slate-400 resize-none leading-relaxed"></textarea>
-            </div>
-
-            <button onclick="processVocab()" class="mt-5 w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-black shadow-md hover:shadow-lg transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2 active:scale-[0.98]">
-                📥 Lưu vào thư viện
-            </button>
+            <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">AI Lab ✨</h2>
+            <p class="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm mt-1">Tạo bộ từ vựng thông minh với ChatGPT</p>
         </div>
     </div>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 max-w-5xl mx-auto w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-bl-full -z-10"></div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                            <span>1. Cấu hình Chủ đề</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Hệ thống sẽ tự động quét và tránh trùng lặp từ đã có.</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">Chủ đề cần học</label>
+                            <input type="text" id="user-topic" placeholder="Ví dụ: Công nghệ thông tin, Môi trường..." class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-medium">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">Trình độ</label>
+                                <select id="user-level" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer">
+                                    <option value="A1-A2">A1-A2 (Cơ bản)</option>
+                                    <option value="B1-B2" selected>B1-B2 (Trung cấp)</option>
+                                    <option value="C1-C2">C1-C2 (Cao cấp)</option>
+                                    <option value="IELTS 6.5+">IELTS 6.5+</option>
+                                    <option value="TOEIC 700+">TOEIC 700+</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">Số lượng</label>
+                                <select id="user-count" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer">
+                                    <option value="5">5 từ</option>
+                                    <option value="10" selected>10 từ</option>
+                                    <option value="20">20 từ</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button onclick="copyDynamicPrompt()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                            <span>📋</span> Lấy mã Prompt thông minh
+                        </button>
+                        <p class="text-center text-[11px] font-medium text-slate-400 mt-3">Copy mã này và dán vào ứng dụng ChatGPT/Claude của bạn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-full">
+                <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col">
+                    <div class="mb-6 flex justify-between items-end">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+                                <span>2. Nhập kết quả từ AI</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Dán câu trả lời của AI vào ô bên dưới.</p>
+                        </div>
+                    </div>
+
+                    <textarea id="ai-input" class="w-full flex-1 min-h-[250px] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 text-sm font-mono text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 mb-6" placeholder="[&#10;  {&#10;    &quot;word&quot;: &quot;...&quot;,&#10;    ...&#10;  }&#10;]"></textarea>
+
+                    <button onclick="processVocab()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 shrink-0">
+                        <span>✨</span> Phân tích & Lưu vào Thư viện
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
 </section>
