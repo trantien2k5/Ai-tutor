@@ -15,44 +15,43 @@
 
 <body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 md:flex md:min-h-screen">
 
-    <aside
-        class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 h-screen sticky top-0 p-6 z-50">
-        <div class="flex items-center gap-3 mb-10 px-2">
-            <div
-                class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-blue-200 dark:shadow-none">
-                ✨</div>
-            <h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tight">AI Vocab</h1>
-        </div>
+    <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 h-screen sticky top-0 p-6 z-50">
+    <div class="flex items-center gap-3 mb-10 px-2">
+        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-blue-200 dark:shadow-none" aria-hidden="true">✨</div>
+        <h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tight">AI Vocab</h1>
+    </div>
 
-        <div class="space-y-2 flex-1">
-            <button onclick="switchTab('home')"
-                class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                data-tab="home">
-                <span class="text-xl">🏠</span><span>Trang chủ</span>
-            </button>
-            <button onclick="switchTab('library')"
-                class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                data-tab="library">
-                <span class="text-xl">📚</span><span>Thư viện</span>
-            </button>
-            <button onclick="switchTab('ai-gen')"
-                class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                data-tab="ai-gen">
-                <span class="text-xl">✨</span><span>AI Thêm Từ</span>
-            </button>
-            <button onclick="switchTab('practice')"
-                class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                data-tab="practice">
-                <span class="text-xl">📝</span><span>Luyện tập</span>
-            </button>
-        </div>
+    <nav aria-label="Main Navigation" class="flex-1 w-full">
+        <ul class="space-y-2">
+            <li>
+                <button data-action="switch-tab" data-payload="home" aria-label="Mở trang chủ" class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" data-tab="home">
+                    <span class="text-xl" aria-hidden="true">🏠</span><span>Trang chủ</span>
+                </button>
+            </li>
+            <li>
+                <button data-action="switch-tab" data-payload="library" aria-label="Mở thư viện từ vựng" class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" data-tab="library">
+                    <span class="text-xl" aria-hidden="true">📚</span><span>Thư viện</span>
+                </button>
+            </li>
+            <li>
+                <button data-action="switch-tab" data-payload="ai-gen" aria-label="Mở công cụ AI thêm từ" class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" data-tab="ai-gen">
+                    <span class="text-xl" aria-hidden="true">✨</span><span>AI Thêm Từ</span>
+                </button>
+            </li>
+            <li>
+                <button data-action="switch-tab" data-payload="practice" aria-label="Mở phần luyện tập" class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" data-tab="practice">
+                    <span class="text-xl" aria-hidden="true">📝</span><span>Luyện tập</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
 
-        <button onclick="switchTab('settings')"
-            class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-            data-tab="settings">
-            <span class="text-xl">⚙️</span><span>Cài đặt</span>
+    <nav aria-label="Settings Navigation" class="w-full mt-auto">
+        <button data-action="switch-tab" data-payload="settings" aria-label="Mở cài đặt hệ thống" class="tab-btn w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" data-tab="settings">
+            <span class="text-xl" aria-hidden="true">⚙️</span><span>Cài đặt</span>
         </button>
-    </aside>
+    </nav>
+</aside>
 
     <div class="flex-1 flex flex-col min-w-0">
         <main id="app-content" class="max-w-5xl mx-auto w-full p-4 md:p-10 pb-24 md:pb-10">
@@ -64,34 +63,37 @@
         </main>
     </div>
 
-    <nav
-        class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-2 pb-safe shadow-lg z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center h-16">
-            <button onclick="switchTab('home')" class="tab-btn flex flex-col items-center flex-1 text-slate-400"
-                data-tab="home">
-                <span class="text-lg">🏠</span><span class="text-[9px] font-bold">Trang chủ</span>
+    <nav aria-label="Mobile Navigation" class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-2 pb-safe shadow-lg z-50">
+    <ul class="max-w-md mx-auto flex justify-between items-center h-16">
+        <li class="flex-1 flex justify-center">
+            <button data-action="switch-tab" data-payload="home" aria-label="Mở trang chủ" class="tab-btn flex flex-col items-center w-full text-slate-400" data-tab="home">
+                <span class="text-lg" aria-hidden="true">🏠</span><span class="text-[9px] font-bold">Trang chủ</span>
             </button>
-            <button onclick="switchTab('library')" class="tab-btn flex flex-col items-center flex-1 text-slate-400"
-                data-tab="library">
-                <span class="text-lg">📚</span><span class="text-[9px] font-bold">Thư viện</span>
+        </li>
+        <li class="flex-1 flex justify-center">
+            <button data-action="switch-tab" data-payload="library" aria-label="Mở thư viện từ vựng" class="tab-btn flex flex-col items-center w-full text-slate-400" data-tab="library">
+                <span class="text-lg" aria-hidden="true">📚</span><span class="text-[9px] font-bold">Thư viện</span>
             </button>
-            <button onclick="switchTab('ai-gen')" class="tab-btn flex flex-col items-center flex-1 -mt-8"
-                data-tab="ai-gen">
-                <div
-                    class="bg-blue-600 text-white p-4 rounded-full shadow-lg border-4 border-white dark:border-slate-900 active:scale-95 transition-transform">
-                    <span>✨</span>
+        </li>
+        <li class="flex-1 flex justify-center -mt-8">
+            <button data-action="switch-tab" data-payload="ai-gen" aria-label="Tạo từ vựng mới bằng AI" class="tab-btn flex flex-col items-center w-full" data-tab="ai-gen">
+                <div class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg border-4 border-white dark:border-slate-900 active:scale-95 transition-transform flex items-center justify-center">
+                    <span class="text-xl leading-none" aria-hidden="true">✨</span>
                 </div>
             </button>
-            <button onclick="switchTab('practice')" class="tab-btn flex flex-col items-center flex-1 text-slate-400"
-                data-tab="practice">
-                <span class="text-lg">📝</span><span class="text-[9px] font-bold">Luyện tập</span>
+        </li>
+        <li class="flex-1 flex justify-center">
+            <button data-action="switch-tab" data-payload="practice" aria-label="Mở phần luyện tập" class="tab-btn flex flex-col items-center w-full text-slate-400" data-tab="practice">
+                <span class="text-lg" aria-hidden="true">📝</span><span class="text-[9px] font-bold">Luyện tập</span>
             </button>
-            <button onclick="switchTab('settings')" class="tab-btn flex flex-col items-center flex-1 text-slate-400"
-                data-tab="settings">
-                <span class="text-lg">⚙️</span><span class="text-[9px] font-bold">Cài đặt</span>
+        </li>
+        <li class="flex-1 flex justify-center">
+            <button data-action="switch-tab" data-payload="settings" aria-label="Mở cài đặt" class="tab-btn flex flex-col items-center w-full text-slate-400" data-tab="settings">
+                <span class="text-lg" aria-hidden="true">⚙️</span><span class="text-[9px] font-bold">Cài đặt</span>
             </button>
-        </div>
-    </nav>
+        </li>
+    </ul>
+</nav>
 
     <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] space-y-3 pointer-events-none"></div>
 

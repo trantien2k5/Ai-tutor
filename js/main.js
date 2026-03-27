@@ -1,17 +1,24 @@
-// js/main.js
 import { AppState } from './core/state.js';
 import { appEventBus, EVENTS } from './core/eventBus.js';
 import { AudioAPI } from './shared/audio.js';
-
 import { SettingsModule } from './features/settings.js';
 import { HomeModule } from './features/home.js';
 import { LibraryModule } from './features/library.js';
 import { AIModule } from './features/ai.js';
 import { FlashcardModule } from './features/flashcard.js';
-// Thêm dòng import PracticeModule ở đây
 import { PracticeModule } from './features/practice.js';
 
-// --- 1. NẠP COMPONENT ---
+const appActions = {
+    ...(HomeModule?.actions || {}),
+    ...(LibraryModule?.actions || {}),
+    ...(AIModule?.actions || {}),
+    ...(FlashcardModule?.actions || {}),
+    ...(PracticeModule?.actions || {}),
+    ...(SettingsModule?.actions || {}),
+    'switch-tab': (payload) => handleSwitchTab(payload),
+    'speak': (payload) => AudioAPI.speak(payload)
+};
+
 async function loadComponent(id, fileName) {
     try {
         const response = await fetch(`components/${fileName}`);
@@ -24,96 +31,79 @@ async function loadComponent(id, fileName) {
             target.innerHTML = section ? section.innerHTML : rawHtml;
         }
     } catch (error) {
-        console.error("Lỗi nạp component:", fileName, error);
+        console.error(error);
     }
 }
 
-// --- 2. QUẢN LÝ TAB (ROUTER) ---
-function switchTab(tabId) {
+function handleSwitchTab(tabId) {
+    if (!tabId) return;
+
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    
+    const targetTab = document.getElementById(`tab-${tabId}`);
+    if (targetTab) targetTab.classList.remove('hidden');
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20');
         btn.classList.add('text-slate-400', 'dark:text-slate-500');
+        btn.setAttribute('aria-current', 'false');
     });
-
-    const targetTab = document.getElementById(`tab-${tabId}`);
-    if (targetTab) targetTab.classList.remove('hidden');
 
     document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(activeBtn => {
         activeBtn.classList.remove('text-slate-400', 'dark:text-slate-500');
         activeBtn.classList.add('text-blue-600', 'dark:text-blue-400');
-        if (!activeBtn.closest('nav')) activeBtn.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
+        activeBtn.setAttribute('aria-current', 'page');
+        
+        if (!activeBtn.closest('.md\\:hidden')) { 
+            activeBtn.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
+        }
     });
 
-    // Cập nhật ở đây: Gọi trực tiếp PracticeModule thay vì window.PracticeModule
-    if (tabId === 'home') {
-        HomeModule.updateStats();
-        HomeModule.renderStreakUI();
-    } else if (tabId === 'library') {
-        LibraryModule.renderLibrary();
-        LibraryModule.renderVocabList(true);
-    } else if (tabId === 'practice') {
-        PracticeModule.updateTopics(); 
-    } else if (tabId === 'settings') {
-        SettingsModule.initUI();
-    }
-
+    appEventBus.emit(EVENTS.TAB_CHANGED, tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-appEventBus.on(EVENTS.TAB_CHANGED, switchTab);
+appEventBus.on(EVENTS.TAB_CHANGED, (tabId) => {
+    switch(tabId) {
+        case 'home':
+            if (HomeModule?.updateStats) HomeModule.updateStats();
+            if (HomeModule?.renderStreakUI) HomeModule.renderStreakUI();
+            break;
+        case 'library':
+            if (LibraryModule?.renderLibrary) LibraryModule.renderLibrary();
+            if (LibraryModule?.renderVocabList) LibraryModule.renderVocabList(true);
+            break;
+        case 'practice':
+            if (PracticeModule?.updateTopics) PracticeModule.updateTopics(); 
+            break;
+        case 'settings':
+            if (SettingsModule?.initUI) SettingsModule.initUI();
+            break;
+    }
+});
 
-// Cập nhật phần Event Delegation trong js/main.js
-document.addEventListener('click', (e) => {
+function handleAction(e) {
     const target = e.target.closest('[data-action]');
     if (!target) return;
 
     const action = target.getAttribute('data-action');
     const payload = target.getAttribute('data-payload');
 
-    // Bọc thép toàn bộ luồng sự kiện click
-    try {
-        switch (action) {
-            case 'start-flashcards': FlashcardModule.start(payload); break;
-            case 'close-flashcards': FlashcardModule.close(); break;
-            case 'flip-card': FlashcardModule.flip(); break;
-            case 'rate-card':
-                e.stopPropagation();
-                FlashcardModule.rate(parseInt(payload));
-                break;
-            case 'prev-card':
-                e.stopPropagation();
-                FlashcardModule.prev();
-                break;
-            case 'speak-flashcard':
-                e.stopPropagation();
-                FlashcardModule.speak();
-                break;
-                
-            case 'set-quiz-mode': PracticeModule.setMode(payload, target); break;
-            case 'set-quiz-count': PracticeModule.setCount(parseInt(payload), target); break;
-            case 'init-quiz': PracticeModule.init(); break;
-            case 'answer-quiz': PracticeModule.handleAnswer(payload, target); break;
-            case 'next-quiz-question': PracticeModule.renderNext(); break;
-            case 'exit-quiz': PracticeModule.exit(); break;
-
-            case 'speak':
-                e.stopPropagation();
-                AudioAPI.speak(payload);
-                break;
-            default:
-                break;
+    if (appActions[action]) {
+        if (e.type === 'click' && target.tagName !== 'INPUT' && target.tagName !== 'SELECT' && target.type !== 'checkbox') {
+            e.preventDefault();
         }
-    } catch (error) {
-        // Nếu một tính năng bị lỗi code (ví dụ do update sai), nó sẽ bị chặn lại ở đây
-        console.error(`[Core System] ❌ Tính năng '${action}' gặp sự cố cục bộ:`, error);
-        
-        // Bạn có thể import showToast vào main.js để báo lỗi nhẹ nhàng cho user
-        // showToast('Tính năng này đang tạm thời gián đoạn', 'error');
+        try {
+            appActions[action](payload, target);
+        } catch (error) {
+            console.error(error);
+        }
     }
-});
+}
 
-// --- 4. KHỞI TẠO ỨNG DỤNG ---
+document.addEventListener('click', handleAction);
+document.addEventListener('change', handleAction);
+
 document.addEventListener('DOMContentLoaded', async () => {
     await Promise.all([
         loadComponent('tab-home', 'home.html'),
@@ -124,29 +114,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('flashcard-wrapper', 'flashcard.html')
     ]);
 
-    SettingsModule.applyTheme();
+    if (SettingsModule?.applyTheme) SettingsModule.applyTheme();
     AudioAPI.initVoices();
-    switchTab('home');
+    handleSwitchTab('home'); 
 
-    window.switchTab = switchTab;
     window.appEventBus = appEventBus;
 });
 
 window.addMoreWordsToTopic = function(topicName) {
-    // 1. Tìm ô nhập chủ đề ở tab AI
     const topicInput = document.getElementById('user-topic');
     if (topicInput) {
-        // 2. Điền tên chủ đề cũ vào
         topicInput.value = topicName;
-        // 3. Focus vào để user thấy
         topicInput.focus();
     }
-    
-    // 4. Chuyển sang tab AI
-    switchTab('ai-gen');
-    
-    // 5. Thông báo nhẹ
-    if (typeof showToast === 'function') {
-        showToast(`Đã chọn chủ đề: ${topicName}. Hãy copy Prompt để sinh thêm từ!`, 'success');
-    }
+    handleSwitchTab('ai-gen');
 }

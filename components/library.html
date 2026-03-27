@@ -4,13 +4,13 @@
             <p class="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm mt-2" id="lib-subtitle">Quản lý các bộ từ vựng của bạn</p>
         </div>
         
-        <button onclick="switchLibView('notebook')" id="btn-open-notebook" class="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
-            <span class="text-xl group-hover:scale-110 transition-transform">📓</span>
+        <button data-action="switch-lib-view" data-payload="notebook" id="btn-open-notebook" aria-label="Mở sổ tay" class="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
+            <span class="text-xl group-hover:scale-110 transition-transform" aria-hidden="true">📓</span>
             <span class="hidden md:block text-[10px] font-black uppercase tracking-widest">Sổ tay</span>
         </button>
         
-        <button onclick="switchLibView('topics')" id="btn-back-topics" class="hidden flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
-            <span class="text-lg group-hover:-translate-x-1 transition-transform">←</span>
+        <button data-action="switch-lib-view" data-payload="topics" id="btn-back-topics" aria-label="Trở về" class="hidden flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2.5 md:py-3 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all group shrink-0">
+            <span class="text-lg group-hover:-translate-x-1 transition-transform" aria-hidden="true">←</span>
             <span class="hidden md:block text-[10px] font-black uppercase tracking-widest">Trở về</span>
         </button>
     </div>
@@ -23,41 +23,41 @@
                 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1 relative min-w-[200px]">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
-                        <input type="text" id="library-search" oninput="handleSearchInput()" placeholder="Tìm kiếm từ vựng, nghĩa, ví dụ..." class="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 transition-shadow outline-none">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">🔍</span>
+                        <input type="text" id="library-search" placeholder="Tìm kiếm từ vựng, nghĩa, ví dụ..." class="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 transition-shadow outline-none">
                     </div>
                     
                     <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-2xl shrink-0">
-                        <button onclick="setLibraryViewMode('list')" id="view-btn-list" class="p-2.5 rounded-xl bg-white dark:bg-slate-700 shadow-sm text-blue-500 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <button data-action="set-lib-view-mode" data-payload="list" id="view-btn-list" aria-label="Xem dạng danh sách" class="p-2.5 rounded-xl bg-white dark:bg-slate-700 shadow-sm text-blue-500 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                         </button>
-                        <button onclick="setLibraryViewMode('grid')" id="view-btn-grid" class="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        <button data-action="set-lib-view-mode" data-payload="grid" id="view-btn-grid" aria-label="Xem dạng lưới" class="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         </button>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap gap-4">
                     <div class="relative flex-1 min-w-[140px]">
-                        <select id="library-topic-filter" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <select id="library-topic-filter" aria-label="Lọc theo chủ đề" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
                             <option value="all">🌐 Tất cả chủ đề</option>
                         </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs" aria-hidden="true">▼</span>
                     </div>
 
                     <div class="relative flex-1 min-w-[140px]">
-                        <select id="library-filter" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <select id="library-filter" aria-label="Lọc theo loại từ" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
                             <option value="all">Tất cả loại từ</option>
                             <option value="n">Danh từ (n)</option>
                             <option value="v">Động từ (v)</option>
                             <option value="adj">Tính từ (adj)</option>
                             <option value="adv">Trạng từ (adv)</option>
                         </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs" aria-hidden="true">▼</span>
                     </div>
 
                     <div class="relative flex-1 min-w-[160px]">
-                        <select id="library-sort" onchange="renderVocabList(true)" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <select id="library-sort" aria-label="Sắp xếp" class="w-full appearance-none bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-3.5 pl-4 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
                             <option value="newest">Mới nhất</option>
                             <option value="oldest">Cũ nhất</option>
                             <option value="az">Từ A - Z</option>
@@ -65,7 +65,7 @@
                             <option value="mastery_asc">Chưa thuộc</option>
                             <option value="mastery_desc">Đã thuộc</option>
                         </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</span>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs" aria-hidden="true">▼</span>
                     </div>
                 </div>
             </div>

@@ -1,184 +1,202 @@
 import { AppState } from '../core/state.js';
-import { appEventBus, EVENTS } from '../core/eventBus.js';
 import { showToast } from '../shared/ui-helpers.js';
+import { AudioAPI } from '../shared/audio.js';
 
 const AIModule = (function() {
-    const CONSTANTS = {
-        DEFAULT_TOPIC: 'General vocabulary',
-        DEFAULT_TOPIC_VI: 'Chung',
-        DEFAULT_LEVEL: 'B1-B2',
-        DEFAULT_COUNT: '10',
-        DEFAULT_ICON_TOPIC: '📁',
-        DEFAULT_ICON_WORD: '📝',
-        DEFAULT_TYPE: 'n'
-    };
+    let suggestedWords = [];
 
-    const getEl = (id) => document.getElementById(id);
-    const getVal = (id, defaultVal = '') => {
-        const el = getEl(id);
-        return (el && el.value.trim()) ? el.value.trim() : defaultVal;
-    };
+    function generatePromptTemplate(topic) {
+        return `Tạo 10 từ vựng tiếng Anh thiết thực thuộc chủ đề "${topic}". 
+Trả về CHỈ MỘT mảng JSON theo đúng định dạng sau, không kèm theo bất kỳ văn bản giải thích hay markdown code block nào khác:
+[
+  {
+    "word": "từ tiếng anh",
+    "wordIcon": "1 emoji phù hợp",
+    "ipa": "/phiên âm/",
+    "mean": "nghĩa tiếng việt",
+    "example": "Một câu ví dụ ngắn gọn"
+  }
+]`;
+    }
 
-    function generatePromptString(topic, level, count, existingWords) {
-        let progressiveInstruction = "Prioritize high-frequency, essential, and practical English words that are most commonly used in real-life situations related to this topic.";
-        
-        if (existingWords.length > 0) {
-            progressiveInstruction = `CRITICAL: The user ALREADY KNOWS the following words. DO NOT generate them again:\n[${existingWords}]\n\nExpand the vocabulary scope to other important, high-frequency, and practical words related to the topic that are NOT in the list above.`;
+    function handleGenerateClick() {
+        const inputEl = document.getElementById('ai-topic-input');
+        const topic = inputEl ? inputEl.value.trim() : '';
+
+        if (!topic) {
+            showToast('⚠️ Vui lòng nhập chủ đề bạn muốn học!', 'error');
+            return;
         }
 
-        return `Act as an expert English teacher and curriculum designer. 
-I want to learn about "${topic}" at ${level} level. Generate exactly ${count} vocabulary words.
-
-${progressiveInstruction}
-
-RULES:
-1. Refine the topic name to be professional, concise, and in Vietnamese.
-2. Provide a single, fitting emoji as the "topicIcon".
-3. For EACH word, provide a unique, descriptive emoji as the "wordIcon".
-4. Mix word types (n, v, adj, adv).
-5. "mean" and "note" MUST be in Vietnamese.
-6. Output ONLY a valid raw JSON object. NO markdown, NO code blocks.
-
-Format EXACTLY like this:
-{
-  "refinedTopic": "Tên chủ đề tiếng Việt chuyên nghiệp",
-  "topicIcon": "🦁",
-  "words": [
-    {
-      "wordIcon": "🐯",
-      "word": "tiger",
-      "ipa": "/ˈtaɪ.ɡɚ/",
-      "type": "n",
-      "mean": "con hổ",
-      "synonyms": "big cat",
-      "antonyms": "prey",
-      "example": "The tiger is a powerful hunter.",
-      "note": "Hổ là loài mèo lớn nhất."
-    }
-  ]
-}`;
+        const prompt = generatePromptTemplate(topic);
+        navigator.clipboard.writeText(prompt).then(() => {
+            showToast('📋 Đã copy lệnh! Hãy dán vào ChatGPT và lấy kết quả.');
+            injectPasteArea();
+        }).catch(() => showToast('❌ Lỗi copy, vui lòng thử lại!', 'error'));
     }
 
-    function extractExistingWords(topicQuery) {
-        const vocabList = AppState.getVocab();
-        const cleanTopicName = topicQuery.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '').toLowerCase().trim();
-        return vocabList
-            .filter(v => (v.topic || '').toLowerCase().includes(cleanTopicName))
-            .map(v => v.word)
-            .join(', ');
+    function injectPasteArea() {
+        let pasteArea = document.getElementById('ai-paste-area');
+        if (pasteArea) return;
+
+        const container = document.querySelector('#tab-ai-gen header .max-w-xl');
+        if (!container) return;
+
+        pasteArea = document.createElement('div');
+        pasteArea.id = 'ai-paste-area';
+        pasteArea.className = 'mt-5 flex gap-3 animate-in fade-in slide-in-from-top-2';
+        pasteArea.innerHTML = `
+            <textarea id="ai-json-input" placeholder="Dán đoạn mã JSON kết quả từ AI vào đây..." class="flex-1 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 text-sm font-mono h-12 resize-none outline-none"></textarea>
+            <button id="process-json-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl transition-all active:scale-95 whitespace-nowrap shadow-md">
+                Xử lý
+            </button>
+        `;
+        container.appendChild(pasteArea);
     }
 
-    function parseRawAIResponse(rawData) {
-        const cleanData = rawData.replace(/^```(json)?|```$/gi, '').trim();
-        const match = cleanData.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-        return JSON.parse(match ? match[0] : cleanData);
-    }
-
-    function createNewVocabItem(item, finalTopic, currentLevel) {
-        return {
-            id: 'vocab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            word: item.word || 'Unknown',
-            wordIcon: item.wordIcon || CONSTANTS.DEFAULT_ICON_WORD,
-            ipa: item.ipa || '/.../',
-            type: item.type || CONSTANTS.DEFAULT_TYPE,
-            mean: item.mean || 'Chưa có nghĩa',
-            synonyms: item.synonyms || 'N/A',
-            antonyms: item.antonyms || 'N/A',
-            example: item.example || '',
-            note: item.note || '',
-            topic: finalTopic,
-            level: currentLevel,          
-            createdAt: new Date().toISOString(), 
-            masteryLevel: 0,              
-            lastReviewed: null            
-        };
-    }
-
-    function copyDynamicPrompt() {
-        const settings = AppState.getSettings();
-        const topic = getVal('user-topic', CONSTANTS.DEFAULT_TOPIC);
-        const level = getVal('user-level', settings.aiLevel || CONSTANTS.DEFAULT_LEVEL);
-        const count = getVal('user-count', settings.aiCount || CONSTANTS.DEFAULT_COUNT);
-
-        const existingWords = extractExistingWords(topic);
-        const prompt = generatePromptString(topic, level, count, existingWords);
-
-        navigator.clipboard.writeText(prompt)
-            .then(() => showToast('📋 Đã copy mã Prompt! Hãy dán vào ChatGPT.'))
-            .catch(() => showToast('❌ Lỗi copy. Vui lòng thử lại!', 'error'));
-    }
-
-    function processVocab() {
-        const inputArea = getEl('ai-input');
-        const rawValue = inputArea ? inputArea.value.trim() : '';
-        
-        if (!rawValue) {
-            return showToast('⚠️ Vui lòng dán kết quả từ AI vào ô!', 'error');
-        }
+    function processPastedJSON() {
+        const jsonInput = document.getElementById('ai-json-input');
+        if (!jsonInput || !jsonInput.value.trim()) return;
 
         try {
-            const parsedData = parseRawAIResponse(rawValue);
-            const settings = AppState.getSettings();
-            const currentLevel = getVal('user-level', settings.aiLevel || CONSTANTS.DEFAULT_LEVEL);
-            const inputTopic = getVal('user-topic', CONSTANTS.DEFAULT_TOPIC_VI);
-            const currentVocab = AppState.getVocab();
-            
-            let vocabList = [];
-            let finalTopic = inputTopic;
+            const rawData = jsonInput.value.trim().replace(/^```(json)?|```$/gi, '');
+            const match = rawData.match(/\[[\s\S]*\]/);
+            const parsed = JSON.parse(match ? match[0] : rawData);
 
-            if (parsedData && Array.isArray(parsedData.words)) {
-                vocabList = parsedData.words; 
-                const icon = parsedData.topicIcon || CONSTANTS.DEFAULT_ICON_TOPIC;
-                const refined = parsedData.refinedTopic || finalTopic;
-                finalTopic = `${icon} ${refined}`.trim();
-            } else if (Array.isArray(parsedData)) {
-                vocabList = parsedData; 
-                finalTopic = `${CONSTANTS.DEFAULT_ICON_TOPIC} ${finalTopic}`.trim();
-            } else {
-                return showToast('❌ Kết quả không đúng định dạng (Array/Object).', 'error');
+            suggestedWords = Array.isArray(parsed) ? parsed : [];
+
+            if (suggestedWords.length === 0) {
+                showToast('❌ JSON không chứa mảng từ vựng hợp lệ.', 'error');
+                return;
             }
 
-            if (vocabList.length === 0) {
-                return showToast('❌ AI không trả về từ vựng nào.', 'error'); 
-            }
-
-            let addedCount = 0;
-            let duplicateCount = 0;
-
-            const enrichedData = vocabList.map(item => {
-                const isExist = currentVocab.some(v => v.word.toLowerCase() === item.word.toLowerCase());
-                if (isExist) {
-                    duplicateCount++;
-                    return null; 
-                }
-                addedCount++;
-                return createNewVocabItem(item, finalTopic, currentLevel);
-            }).filter(Boolean); 
-
-            if (enrichedData.length === 0) {
-                return showToast('⚠️ Các từ vựng này đã có sẵn trong thư viện!', 'error');
-            }
-
-            AppState.setVocab([...enrichedData, ...currentVocab]);
-            inputArea.value = '';
-            
-            const msg = duplicateCount > 0 
-                ? `🎉 Đã tạo chủ đề: ${finalTopic} (Bỏ qua ${duplicateCount} từ trùng)`
-                : `🎉 Đã tạo chủ đề: ${finalTopic}`;
-            showToast(msg);
-            
-            appEventBus.emit(EVENTS.TAB_CHANGED, 'library');
-
-        } catch (e) { 
-            showToast('❌ Lỗi: Mã JSON không hợp lệ! Hãy kiểm tra lại kết quả của AI.', 'error'); 
+            renderSuggestions();
+            showToast('✨ Đã tải danh sách từ vựng gợi ý!');
+            jsonInput.value = '';
+        } catch (e) {
+            showToast('❌ Định dạng JSON bị lỗi! Hãy kiểm tra lại.', 'error');
             console.error(e);
         }
     }
 
-    return { copyDynamicPrompt, processVocab };
-})();
+    function createSuggestionCardHTML(item, index) {
+        const safeWord = item.word.replace(/"/g, '&quot;');
+        return `
+        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-4 transition-all hover:shadow-md" id="ai-card-${index}">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-3xl rounded-xl" aria-hidden="true">
+                    ${item.wordIcon || '📝'}
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-xl font-black text-slate-800 dark:text-white">${safeWord}</h4>
+                    <p class="text-slate-400 dark:text-slate-500 font-mono text-sm">${item.ipa || '/.../'}</p>
+                </div>
+            </div>
 
-window.copyDynamicPrompt = AIModule.copyDynamicPrompt;
-window.processVocab = AIModule.processVocab;
+            <div class="space-y-2">
+                <p class="text-slate-700 dark:text-slate-300 font-bold">${item.mean}</p>
+                <p class="text-slate-600 dark:text-slate-400 text-sm italic">"${item.example || ''}"</p>
+            </div>
+
+            <div class="flex gap-2 mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button data-action="speak-ai-word" data-payload="${safeWord}" aria-label="Nghe" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 rounded-lg text-sm font-bold flex items-center justify-center gap-2 active:scale-95">
+                    <span aria-hidden="true">🔊</span> Nghe
+                </button>
+                <button data-action="add-ai-word" data-payload="${index}" aria-label="Thêm" class="flex-1 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-lg text-sm font-bold flex items-center justify-center gap-2 active:scale-95">
+                    <span aria-hidden="true">➕</span> Thêm
+                </button>
+                <button data-action="remove-ai-word" data-payload="${index}" aria-label="Xóa" class="p-2.5 bg-red-50 hover:bg-red-100 text-red-500 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 rounded-lg text-sm active:scale-95">
+                    <span aria-hidden="true">🗑️</span>
+                </button>
+            </div>
+        </article>`;
+    }
+
+    function renderSuggestions() {
+        const container = document.getElementById('ai-suggestions-container');
+        if (!container) return;
+
+        if (suggestedWords.length === 0) {
+            container.innerHTML = `<p class="col-span-full text-center text-slate-400 font-medium py-10">Kết quả gợi ý sẽ hiển thị ở đây.</p>`;
+            return;
+        }
+
+        container.innerHTML = suggestedWords.map((item, index) => createSuggestionCardHTML(item, index)).join('');
+    }
+
+    function handleAddWord(index) {
+        const wordData = suggestedWords[index];
+        if (!wordData) return;
+
+        const currentVocab = AppState.getVocab();
+        const isExist = currentVocab.some(v => v.word.toLowerCase() === wordData.word.toLowerCase());
+
+        if (isExist) {
+            showToast('⚠️ Từ này đã tồn tại trong thư viện!', 'error');
+            return;
+        }
+
+        const inputEl = document.getElementById('ai-topic-input');
+        const topicName = inputEl && inputEl.value.trim() ? inputEl.value.trim() : 'Từ vựng mới';
+
+        const newVocabItem = {
+            id: 'vocab_' + Date.now() + Math.floor(Math.random() * 1000),
+            word: wordData.word,
+            wordIcon: wordData.wordIcon || '📝',
+            ipa: wordData.ipa || '/.../',
+            type: wordData.type || 'n',
+            mean: wordData.mean,
+            example: wordData.example || '',
+            topic: '✨ ' + topicName,
+            createdAt: new Date().toISOString(),
+            masteryLevel: 0
+        };
+
+        AppState.setVocab([newVocabItem, ...currentVocab]);
+        showToast(`✅ Đã thêm "${wordData.word}" vào thư viện!`);
+        handleRemoveWord(index);
+    }
+
+    function handleRemoveWord(index) {
+        const card = document.getElementById(`ai-card-${index}`);
+        if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => card.remove(), 250);
+        }
+    }
+
+    // Đăng ký Event Delegation toàn cục để xử lý linh hoạt cho HTML load động
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#generate-ai-words-btn')) {
+            handleGenerateClick();
+            return;
+        }
+
+        if (e.target.closest('#process-json-btn')) {
+            processPastedJSON();
+            return;
+        }
+
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+            const action = actionBtn.getAttribute('data-action');
+            const payload = actionBtn.getAttribute('data-payload');
+
+            if (action === 'speak-ai-word') {
+                e.preventDefault();
+                AudioAPI.speak(payload);
+            } else if (action === 'add-ai-word') {
+                e.preventDefault();
+                handleAddWord(parseInt(payload, 10));
+            } else if (action === 'remove-ai-word') {
+                e.preventDefault();
+                handleRemoveWord(parseInt(payload, 10));
+            }
+        }
+    });
+
+    return {};
+})();
 
 export { AIModule };

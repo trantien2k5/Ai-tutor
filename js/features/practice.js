@@ -336,14 +336,19 @@ const PracticeModule = (function() {
         }
     }
 
+    const actions = {
+        'set-quiz-mode': (payload, target) => setQuizMode(payload, target),
+        'set-quiz-count': (payload, target) => setQuizCount(parseInt(payload, 10), target),
+        'init-quiz': () => initNewQuiz(),
+        'answer-quiz': (payload, target) => handleQuizAnswer(payload, target),
+        'next-quiz-question': () => renderQuizQuestion(),
+        'exit-quiz': () => exitQuiz()
+    };
+
     return {
-        setMode: setQuizMode,
-        setCount: setQuizCount,
-        updateTopics: updateQuizTopics,
         init: initNewQuiz,
-        handleAnswer: handleQuizAnswer,
-        renderNext: renderQuizQuestion,
-        exit: exitQuiz
+        updateTopics: updateQuizTopics,
+        actions
     };
 })();
 

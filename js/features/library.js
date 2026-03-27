@@ -83,10 +83,10 @@ const LibraryModule = (function() {
         if (topics.length === 0) {
             container.innerHTML = `
             <div class="col-span-full py-16 text-center bg-white dark:bg-slate-800 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-700 shadow-sm">
-                <p class="text-5xl mb-4 opacity-50">📭</p>
+                <p class="text-5xl mb-4 opacity-50" aria-hidden="true">📭</p>
                 <h3 class="text-lg font-black text-slate-700 dark:text-slate-200">Thư viện trống</h3>
                 <p class="text-sm font-medium text-slate-400 mt-2">Hãy dùng AI để tạo ngay bộ từ vựng đầu tiên!</p>
-                <button onclick="appEventBus.emit('TAB_CHANGED', 'ai-gen')" class="mt-6 bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-100 transition-colors shadow-sm">Tạo từ mới ✨</button>
+                <button data-action="switch-tab" data-payload="ai-gen" class="mt-6 bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-100 transition-colors shadow-sm">Tạo từ mới ✨</button>
             </div>`;
             return;
         }
@@ -104,15 +104,16 @@ const LibraryModule = (function() {
                 name = topic.replace(/^📁\s*/, '');
             }
 
+            // Flashcard đã được kích hoạt lại thông qua data-action="start-flashcards"
             return `
-            <div class="group relative overflow-hidden bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]" onclick="switchLibView('notebook', '${topic}')">
+            <div data-action="switch-lib-view-topic" data-payload="${topic}" class="group relative overflow-hidden bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-full blur-2xl -z-10 transition-transform duration-500 group-hover:scale-150 opacity-60 -mr-10 -mt-10"></div>
                 
                 <div class="flex justify-between items-start mb-4">
-                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-sm">${icon}</div>
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-sm" aria-hidden="true">${icon}</div>
                     <div class="flex gap-1">
-                        <button onclick="event.stopPropagation(); window.addMoreWordsToTopic('${topic}')" class="w-8 h-8 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100">➕</button>
-                        <button onclick="event.stopPropagation(); deleteTopic('${topic}')" class="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/30 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100">🗑️</button>
+                        <button data-action="add-more-words" data-payload="${topic}" aria-label="Thêm từ vào chủ đề" class="w-8 h-8 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100"><span aria-hidden="true">➕</span></button>
+                        <button data-action="delete-topic" data-payload="${topic}" aria-label="Xóa chủ đề" class="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/30 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100"><span aria-hidden="true">🗑️</span></button>
                     </div>
                 </div>
                 
@@ -120,7 +121,7 @@ const LibraryModule = (function() {
                     <h3 class="font-black text-slate-800 dark:text-white text-lg tracking-tight truncate pr-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title="${name}">${name}</h3>
                     <div class="mt-3 flex items-center justify-between">
                         <span class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-slate-100 dark:border-slate-700/50">${count} từ</span>
-                        <button onclick="event.stopPropagation(); document.querySelector('[data-action=start-flashcards][data-payload=\\'${topic}\\']').click()" data-action="start-flashcards" data-payload="${topic}" class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">Ôn tập →</button>
+                        <button data-action="start-flashcards" data-payload="${topic}" class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">Ôn tập →</button>
                     </div>
                 </div>
             </div>`;
@@ -198,7 +199,7 @@ const LibraryModule = (function() {
             }
 
             if (currentFilteredList.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-20 text-center animate-pulse"><p class="text-5xl mb-4 opacity-50">🔍</p><p class="text-slate-500 dark:text-slate-400 font-bold">Không tìm thấy từ vựng nào.</p></div>`;
+                container.innerHTML = `<div class="col-span-full py-20 text-center animate-pulse"><p class="text-5xl mb-4 opacity-50" aria-hidden="true">🔍</p><p class="text-slate-500 dark:text-slate-400 font-bold">Không tìm thấy từ vựng nào.</p></div>`;
                 if (sentinel) sentinel.classList.add('hidden');
                 return;
             }
@@ -244,7 +245,7 @@ const LibraryModule = (function() {
 
             return `
             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300 group relative overflow-hidden flex ${layoutClasses}">
-                <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-4xl md:text-5xl group-hover:rotate-12 transition-transform duration-300 flex-shrink-0 relative">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center text-4xl md:text-5xl group-hover:rotate-12 transition-transform duration-300 flex-shrink-0 relative" aria-hidden="true">
                     ${wordIcon}
                     <span class="absolute -bottom-2 -right-2 text-xs md:text-sm bg-white dark:bg-slate-800 rounded-full p-0.5 shadow-sm">${masteryIcon}</span>
                 </div>
@@ -258,14 +259,14 @@ const LibraryModule = (function() {
                     <p class="text-slate-700 dark:text-slate-200 font-bold text-sm md:text-base mb-3 pr-20 leading-snug line-clamp-2">${item.mean}</p>
                     
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-3 md:p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 relative ${exampleClasses}">
-                        <span class="absolute top-1 right-2 md:top-2 md:right-3 text-2xl md:text-3xl font-serif text-slate-200 dark:text-slate-700 leading-none">"</span>
+                        <span class="absolute top-1 right-2 md:top-2 md:right-3 text-2xl md:text-3xl font-serif text-slate-200 dark:text-slate-700 leading-none" aria-hidden="true">"</span>
                         <p class="text-xs italic text-slate-600 dark:text-slate-400 leading-relaxed font-medium relative z-10 line-clamp-2">${item.example || 'Chưa có ví dụ minh họa.'}</p>
                     </div>
                 </div>
 
                 <div class="absolute top-4 right-4 md:top-5 md:right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 transform translate-x-4 group-hover:translate-x-0">
-                    <button data-action="speak" data-payload="${safeWord}" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-500 text-blue-500 hover:text-white dark:bg-blue-900/30 rounded-xl transition-colors shadow-sm">🔊</button>
-                    <button onclick="deleteVocab(${originalIndex})" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-red-50 hover:bg-red-500 text-red-400 hover:text-white dark:bg-red-900/30 rounded-xl transition-colors shadow-sm">🗑️</button>
+                    <button data-action="speak" data-payload="${safeWord}" aria-label="Phát âm" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-500 text-blue-500 hover:text-white dark:bg-blue-900/30 rounded-xl transition-colors shadow-sm"><span aria-hidden="true">🔊</span></button>
+                    <button data-action="delete-vocab" data-payload="${originalIndex}" aria-label="Xóa từ" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-red-50 hover:bg-red-500 text-red-400 hover:text-white dark:bg-red-900/30 rounded-xl transition-colors shadow-sm"><span aria-hidden="true">🗑️</span></button>
                 </div>
             </div>`;
         }).join('');
@@ -300,21 +301,46 @@ const LibraryModule = (function() {
         renderVocabList(true);
     });
 
+    // Bắt sự kiện trực tiếp trong Module (thay thế hoàn toàn cho oninput, onchange và window.func)
+    document.addEventListener('input', (e) => {
+        if (e.target.id === 'library-search') handleSearchInput();
+    });
+
+    document.addEventListener('change', (e) => {
+        if (['library-topic-filter', 'library-filter', 'library-sort'].includes(e.target.id)) {
+            renderVocabList(true);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+
+        const action = btn.getAttribute('data-action');
+        const payload = btn.getAttribute('data-payload');
+
+        if (action === 'switch-lib-view') switchLibView(payload);
+        else if (action === 'switch-lib-view-topic') switchLibView('notebook', payload);
+        else if (action === 'set-lib-view-mode') setLibraryViewMode(payload);
+        else if (action === 'delete-topic') { e.stopPropagation(); deleteTopic(payload); }
+        else if (action === 'delete-vocab') { e.stopPropagation(); deleteVocab(parseInt(payload, 10)); }
+        else if (action === 'add-more-words') { 
+            e.stopPropagation(); 
+            // Gọi hàm khai báo ở main.js (bạn đã viết sẵn chức năng này)
+            if (window.addMoreWordsToTopic) window.addMoreWordsToTopic(payload); 
+        }
+        else if (action === 'start-flashcards') {
+            e.stopPropagation(); // Ngăn sự kiện click bọt lên mở Sổ tay
+            // Việc xử lý mở Flashcard được lo bởi main.js, nên không cần viết code mở ở đây.
+        }
+    });
+
+    // Chỉ xuất khẩu các hàm cần thiết để main.js gọi lúc khởi tạo (tránh biến rác toàn cục)
     return {
         renderLibrary,
-        renderVocabList,
-        switchLibView,
-        setLibraryViewMode,
-        deleteTopic,
-        deleteVocab,
-        handleSearchInput
+        renderVocabList
     };
 })();
 
-window.handleSearchInput = LibraryModule.handleSearchInput;
-window.switchLibView = LibraryModule.switchLibView;
-window.setLibraryViewMode = LibraryModule.setLibraryViewMode;
-window.deleteTopic = LibraryModule.deleteTopic;
-window.deleteVocab = LibraryModule.deleteVocab;
-
+// Đã loại bỏ hoàn toàn các dòng khai báo window.handleSearchInput = ...
 export { LibraryModule };

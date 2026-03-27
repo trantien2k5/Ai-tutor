@@ -189,8 +189,16 @@ const FlashcardModule = (function () {
         if (card) AudioAPI.speak(card.word);
     }
 
-    return { start: startFlashcards, close: closeFlashcards, flip: flipCard, rate: rateFlashcard, prev: prevCard, speak: speakCurrentCard };
+    const actions = {
+        'start-flashcards': (payload) => startFlashcards(payload),
+        'close-flashcards': () => closeFlashcards(),
+        'flip-card': () => flipCard(),
+        'rate-card': (payload) => rateFlashcard(parseInt(payload, 10)),
+        'prev-card': () => prevCard(),
+        'speak-flashcard': () => speakCurrentCard()
+    };
+
+    return { actions };
 })();
 
-window.FlashcardModule = FlashcardModule;
 export { FlashcardModule };
