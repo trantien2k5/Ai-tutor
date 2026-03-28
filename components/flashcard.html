@@ -1,61 +1,61 @@
-<div id="flashcard-view" class="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-[100] hidden animate-in fade-in duration-300">
-    <div class="w-full h-full flex flex-col p-4">
-        <div class="flex-1 w-full max-w-xl mx-auto flex flex-col justify-center relative">
-            <button data-action="close-flashcards" class="absolute top-0 right-0 w-10 h-10 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all active:scale-95 z-50">✕</button>
-            
-            <div class="mb-4 flex items-center justify-between px-2 w-full">
-                <div class="flex-1 bg-white/20 h-2 rounded-full overflow-hidden backdrop-blur-sm">
-                    <div id="card-progress-bar" class="bg-white h-full w-0 transition-all duration-300"></div>
+<div id="flashcard-view" class="fixed inset-0 bg-slate-50 dark:bg-slate-900 z-[100] hidden animate-in slide-in-from-bottom-5 duration-300 overflow-y-auto">
+    <div class="sticky top-0 w-full p-4 md:p-6 flex items-center justify-between z-50 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md">
+        <button data-action="close-flashcards" aria-label="Đóng" class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 active:scale-95 transition-all hover:bg-slate-100 dark:hover:bg-slate-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <div class="flex-1 max-w-md mx-6 bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700/50 shadow-inner">
+            <div id="card-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+        <span id="card-progress" class="text-slate-600 dark:text-slate-400 text-sm font-black font-mono min-w-[40px] text-right">0/0</span>
+    </div>
+
+    <div class="w-full max-w-xl mx-auto flex flex-col justify-center relative p-4 mt-2 md:mt-8">
+        
+        <div class="w-full h-[60vh] sm:h-[450px] perspective-1000 relative group cursor-pointer" data-action="flip-card">
+            <div id="card-inner" class="w-full h-full relative preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                
+                <div class="absolute inset-0 backface-hidden bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl p-6 md:p-10 flex flex-col justify-center items-center text-center border border-slate-100 dark:border-slate-700">
+                    <span id="card-front-type" class="text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 dark:border-slate-700 px-4 py-1.5 rounded-full mb-6 shadow-sm">Type</span>
+                    <h2 id="card-front-word" class="font-black text-slate-800 dark:text-white tracking-tight break-words w-full leading-tight text-4xl sm:text-5xl">Word</h2>
+                    <p id="card-front-ipa" class="text-blue-500 font-mono font-bold mt-4 tracking-wider text-sm sm:text-base bg-blue-50 dark:bg-blue-900/20 px-4 py-1 rounded-xl">/ipa/</p>
+                    <p class="absolute bottom-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest animate-pulse">Chạm vào thẻ để lật</p>
                 </div>
-                <span id="card-progress" class="text-white text-xs font-bold ml-4 font-mono">0 / 0</span>
-            </div>
 
-            <div class="w-full h-[65vh] sm:h-[400px] perspective-1000 relative group cursor-pointer" data-action="flip-card">
-                <div id="card-inner" class="w-full h-full relative preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                    
-                    <div class="absolute inset-0 backface-hidden bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl p-6 md:p-10 flex flex-col justify-center items-center text-center border-4 border-white dark:border-slate-700">
-                        <span id="card-front-type" class="text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-full mb-4">Type</span>
-                        <h2 id="card-front-word" class="font-black text-slate-800 dark:text-white tracking-tight break-words w-full leading-tight text-4xl sm:text-5xl">Word</h2>
-                        <p id="card-front-ipa" class="text-blue-500 font-mono font-bold mt-4 tracking-wider text-sm sm:text-base">/ipa/</p>
-                        <p class="absolute bottom-6 text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest">Chạm để xem nghĩa</p>
-                    </div>
+                <div class="absolute inset-0 backface-hidden rotate-y-180 bg-blue-600 dark:bg-blue-900 rounded-[2.5rem] shadow-xl p-6 md:p-10 flex flex-col justify-center border-2 border-blue-500 dark:border-blue-800 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                    <div class="relative z-10 w-full">
+                        <p id="card-back-type-ipa" class="text-blue-200 font-mono text-xs font-bold mb-3 tracking-wider"></p>
+                        <h2 id="card-back-mean" class="text-2xl sm:text-3xl font-black mb-6 leading-snug drop-shadow-sm">Nghĩa tiếng Việt</h2>
+                        
+                        <div class="bg-white/10 p-5 rounded-2xl border border-white/20 mb-4 backdrop-blur-sm shadow-inner">
+                            <p id="card-back-example" class="italic text-sm sm:text-base font-medium text-blue-50">"Ví dụ"</p>
+                        </div>
 
-                    <div class="absolute inset-0 backface-hidden rotate-y-180 bg-blue-600 dark:bg-blue-900 rounded-[2rem] shadow-2xl p-6 md:p-10 flex flex-col justify-center border-4 border-blue-500 dark:border-blue-800 text-white relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                        <div class="relative z-10 w-full">
-                            <p id="card-back-type-ipa" class="text-blue-200 font-mono text-xs font-bold mb-3 tracking-wider"></p>
-                            <h2 id="card-back-mean" class="text-2xl sm:text-3xl font-black mb-6 leading-snug">Nghĩa tiếng Việt</h2>
-                            
-                            <div class="bg-white/10 p-4 rounded-2xl border border-white/20 mb-4 backdrop-blur-sm">
-                                <p id="card-back-example" class="italic text-sm sm:text-base font-medium text-blue-50">"Ví dụ"</p>
+                        <div class="grid grid-cols-2 gap-3 text-left">
+                            <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="block text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Đồng nghĩa</span>
+                                <span id="card-back-synonyms" class="text-xs font-bold text-emerald-100 truncate block"></span>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-3 text-left">
-                                <div class="bg-black/20 p-3 rounded-xl">
-                                    <span class="block text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Đồng nghĩa</span>
-                                    <span id="card-back-synonyms" class="text-xs font-bold text-emerald-100"></span>
-                                </div>
-                                <div class="bg-black/20 p-3 rounded-xl">
-                                    <span class="block text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1">Trái nghĩa</span>
-                                    <span id="card-back-antonyms" class="text-xs font-bold text-rose-100"></span>
-                                </div>
+                            <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="block text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1">Trái nghĩa</span>
+                                <span id="card-back-antonyms" class="text-xs font-bold text-rose-100 truncate block"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="relative h-24 mt-6">
-                <div id="flashcard-controls-front" class="absolute inset-0 flex justify-center items-center gap-6 transition-all duration-300">
-                    <button data-action="prev-card" class="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all shadow-lg text-xl">←</button>
-                    <button data-action="speak-flashcard" class="w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-400 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 transition-all text-2xl active:scale-95">🔊</button>
-                </div>
+        <div class="relative h-24 mt-8">
+            <div id="flashcard-controls-front" class="absolute inset-0 flex justify-center items-center gap-6 transition-all duration-300">
+                <button data-action="prev-card" class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all shadow-md border border-slate-200 dark:border-slate-700 text-xl active:scale-95">→</button>
+                <button data-action="speak-flashcard" class="w-16 h-16 rounded-3xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 transition-all text-2xl active:scale-95">🔊</button>
+            </div>
 
-                <div id="flashcard-controls-back" class="absolute inset-0 flex justify-center items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none scale-95">
-                    <button data-action="rate-card" data-payload="-1" class="flex-1 max-w-[120px] py-4 bg-rose-500 hover:bg-rose-400 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/30 transition-all active:scale-95">Lại 🔴</button>
-                    <button data-action="rate-card" data-payload="0" class="flex-1 max-w-[120px] py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-500/30 transition-all active:scale-95">Khó 🟠</button>
-                    <button data-action="rate-card" data-payload="1" class="flex-1 max-w-[120px] py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-500/30 transition-all active:scale-95">Dễ 🟢</button>
-                </div>
+            <div id="flashcard-controls-back" class="absolute inset-0 flex justify-center items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none scale-95">
+                <button data-action="rate-card" data-payload="-1" class="flex-1 max-w-[120px] py-4 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 dark:text-rose-400 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-rose-200 dark:border-rose-800">Lại 🔴</button>
+                <button data-action="rate-card" data-payload="0" class="flex-1 max-w-[120px] py-4 bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-amber-200 dark:border-amber-800">Khó 🟠</button>
+                <button data-action="rate-card" data-payload="1" class="flex-1 max-w-[120px] py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-500/30 transition-all active:scale-95">Dễ 🟢</button>
             </div>
         </div>
     </div>

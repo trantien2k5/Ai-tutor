@@ -190,7 +190,18 @@ const FlashcardModule = (function () {
     }
 
     const actions = {
-        'start-flashcards': (payload) => startFlashcards(payload),
+        'start-flashcards': (payload) => {
+            let targetTopic = payload;
+            try {
+                // SỬA LỖI Ở ĐÂY: Tự động phát hiện và giải mã nếu payload bị mã hóa
+                if (payload && payload.includes('%')) {
+                    targetTopic = decodeURIComponent(payload);
+                }
+            } catch (e) {
+                targetTopic = payload; // Nếu lỗi thì dùng chuỗi gốc
+            }
+            startFlashcards(targetTopic);
+        },
         'close-flashcards': () => closeFlashcards(),
         'flip-card': () => flipCard(),
         'rate-card': (payload) => rateFlashcard(parseInt(payload, 10)),

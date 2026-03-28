@@ -4,6 +4,7 @@ import { AudioAPI } from './shared/audio.js';
 import { SettingsModule } from './features/settings.js';
 import { HomeModule } from './features/home.js';
 import { LibraryModule } from './features/library.js';
+import { NotebookModule } from './features/notebook.js';
 import { AIModule } from './features/ai.js';
 import { FlashcardModule } from './features/flashcard.js';
 import { PracticeModule } from './features/practice.js';
@@ -11,6 +12,7 @@ import { PracticeModule } from './features/practice.js';
 const appActions = {
     ...(HomeModule?.actions || {}),
     ...(LibraryModule?.actions || {}),
+    ...(NotebookModule?.actions || {}),
     ...(AIModule?.actions || {}),
     ...(FlashcardModule?.actions || {}),
     ...(PracticeModule?.actions || {}),
@@ -39,7 +41,6 @@ function handleSwitchTab(tabId) {
     if (!tabId) return;
 
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    
     const targetTab = document.getElementById(`tab-${tabId}`);
     if (targetTab) targetTab.classList.remove('hidden');
 
@@ -53,7 +54,6 @@ function handleSwitchTab(tabId) {
         activeBtn.classList.remove('text-slate-400', 'dark:text-slate-500');
         activeBtn.classList.add('text-blue-600', 'dark:text-blue-400');
         activeBtn.setAttribute('aria-current', 'page');
-        
         if (!activeBtn.closest('.md\\:hidden')) { 
             activeBtn.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
         }
@@ -71,7 +71,10 @@ appEventBus.on(EVENTS.TAB_CHANGED, (tabId) => {
             break;
         case 'library':
             if (LibraryModule?.renderLibrary) LibraryModule.renderLibrary();
-            if (LibraryModule?.renderVocabList) LibraryModule.renderVocabList(true);
+            const notebookView = document.getElementById('library-notebook-view');
+            if (notebookView && !notebookView.classList.contains('hidden')) {
+                if (NotebookModule?.renderVocabList) NotebookModule.renderVocabList(true);
+            }
             break;
         case 'practice':
             if (PracticeModule?.updateTopics) PracticeModule.updateTopics(); 
@@ -94,7 +97,7 @@ function handleAction(e) {
             e.preventDefault();
         }
         try {
-            appActions[action](payload, target);
+            appActions[action](payload, target, e);
         } catch (error) {
             console.error(error);
         }
